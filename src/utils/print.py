@@ -89,7 +89,7 @@ def build_action_report_string(
     match action.action_type:
         case ActionType.income:
             action_report_string += "take income."
-        case ActionType.foreign_aid:
+        case ActionType.foreignaid:
             action_report_string += "take foreign aid."
         case ActionType.coup:
             action_report_string += f"perform a coup against {target_player.name}."

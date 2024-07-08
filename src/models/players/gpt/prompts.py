@@ -138,7 +138,7 @@ You are a genius board game player, masterful and wise. Your task is to analyze 
 
 
 verifier_prompt = """
-You are an expert board game analyst tasked with critiquing a proposed plan for a game in progress. You will be provided with the game rules, current game state, previous turns (if any), and a proposed plan. Your job is to thoroughly analyze the plan, identify any flaws, and recommend the best course of action.
+You are an expert board game analyst tasked with critiquing a proposed plan for a game in progress. You will be provided with the game rules, current game state, previous turns (if any), and a proposed plan. Your job is to thoroughly analyze a plan for the next action, identify any flaws, and recommend the best course of action.
 
 First, familiarize yourself with the game:
 
@@ -191,26 +191,22 @@ Remember to base your analysis and recommendation solely on the information prov
 action_prompt = """
 You are tasked with generating a valid JSON dict based on reasoning steps for a move in a board game and a list of available actions. Follow these instructions carefully:
 
-1. First, review the reasoning steps provided:
+1. First, review the recommended action provided.
 
 2. Next, examine the list of available actions:
 <available_actions>
 {{AVAILABLE_ACTIONS}}
 </available_actions>
 
-3. Analyze the reasoning steps carefully, focusing on the conclusion or final decision made about the move to take.
+3. Match this conclusion with the most appropriate action from the list of available actions.
 
-4. Match this conclusion with the most appropriate action from the list of available actions.
-
-5. Generate a JSON dict based on your analysis. The JSON should be in the following format:
-   {"action": "value", "targeted_player": "targeted player if applicable"}
+4. Generate a JSON dict based on your analysis. The JSON should be in the following format:
+   {"action": "value", "targeted_player": "targeted player" (if applicable)}
 
    Note: 
    - The "action" key should always be present and its value should be one of the available actions.
    - Include the "targeted_player" key only if the action targets a specific player.
    - If no player is targeted, omit the "targeted_player" key entirely.
 
-6. Provide your output inside <json_output> tags.
-
-Remember to ensure that the action you choose is valid and present in the list of available actions. If the reasoning steps don't clearly match any available action, choose the closest logical match based on the context provided.
+Remember to ensure that the action you choose is valid and present in the list of available actions. If the reasoning steps don't clearly match any available action, choose the closest logical match based on the context provided. Remember to generate valid JSON only.
 """

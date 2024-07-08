@@ -266,7 +266,7 @@ class ResistanceCoupGameHandler:
                 self._take_coin_from_treasury(self.current_player, 1)
                 print_text(f"{self.current_player}'s coins are increased by 1")
                 self._round_history.append(f"{self.current_player}'s coins are increased by 1")
-            case ActionType.foreign_aid:
+            case ActionType.foreignaid:
                 if not countered:
                     # Player gets 2 coin
                     self._take_coin_from_treasury(self.current_player, 2)
