@@ -142,13 +142,12 @@ class ResistanceCoupGameHandler:
             player=self.current_player, action=target_action, target_player=target_player
         )
 
-        self._round_history.append(action_report_string)
-        print_text(f"==========Round history: {self._round_history}=========")
-
         print_text(
             action_report_string,
             with_markup=True,
         )
+
+        self._round_history.append(action_report_string)
 
         return target_action, target_player
 
