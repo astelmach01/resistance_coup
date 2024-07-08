@@ -7,10 +7,11 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.11,<3.13"
 pydantic = "^2.5.2"
 names = "^0.3.0"
 rich = "^13.7.0"
+pyautogen = "^0.2.32"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.3.2"

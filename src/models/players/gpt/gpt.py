@@ -7,12 +7,11 @@ from src.models.players.base import BasePlayer
 from src.utils.print import print_text, print_texts
 
 
-class AIPlayer(BasePlayer):
+class GPTPlayer(BasePlayer):
+
     is_ai: bool = True
 
     def choose_action(self, other_players: List[BasePlayer]) -> Tuple[Action, Optional[BasePlayer]]:
-        """Choose the next action to perform"""
-
         available_actions = self.available_actions()
 
         print_text(f"[bold magenta]{self}[/] is thinking...", with_markup=True)

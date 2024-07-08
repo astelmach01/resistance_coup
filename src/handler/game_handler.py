@@ -6,9 +6,8 @@ import names
 
 from src.models.action import Action, ActionType, CounterAction, get_counter_action
 from src.models.card import Card, build_deck
-from src.models.players.ai import AIPlayer
 from src.models.players.base import BasePlayer
-from src.models.players.human import HumanPlayer
+from src.models.players.gpt import GPTPlayer
 from src.utils.game_state import generate_players_table, generate_state_panel
 from src.utils.print import (
     build_action_report_string,
@@ -33,15 +32,14 @@ class ResistanceCoupGameHandler:
     _deck: List[Card] = []
     _number_of_players: int = 0
     _treasury: int = 0
+    _round_history: List[str] = []
 
-    def __init__(self, player_name: str, number_of_players: int):
+    def __init__(self, number_of_players: int):
         self._number_of_players = number_of_players
 
         # Set up players
-        self._players.append(HumanPlayer(name=player_name))
-
         unique_names = set()
-        for i in range(number_of_players - 1):
+        for i in range(number_of_players):
             gender = random.choice(["male", "female"])
 
             ai_name = names.get_first_name(gender=gender)
@@ -50,7 +48,7 @@ class ResistanceCoupGameHandler:
 
             unique_names.add(ai_name)
 
-            self._players.append(AIPlayer(name=ai_name))
+            self._players.append(GPTPlayer(name=ai_name))
 
     @property
     def current_player(self) -> BasePlayer:
@@ -95,8 +93,9 @@ class ResistanceCoupGameHandler:
             # Includes the player in the game
             player.is_active = True
 
-        # Random starting player
-        self._current_player_index = random.randint(0, self._number_of_players - 1)
+        # self._current_player_index = random.randint(0, self._number_of_players - 1)
+        # 1st player goes first
+        self._current_player_index = 0
 
     def _swap_card(self, player: BasePlayer, card: Card) -> None:
         self._deck.append(card)
@@ -139,10 +138,15 @@ class ResistanceCoupGameHandler:
         # Player chooses action
         target_action, target_player = self.current_player.choose_action(players_without_current)
 
+        action_report_string = build_action_report_string(
+            player=self.current_player, action=target_action, target_player=target_player
+        )
+
+        self._round_history.append(action_report_string)
+        print_text(f"==========Round history: {self._round_history}=========")
+
         print_text(
-            build_action_report_string(
-                player=self.current_player, action=target_action, target_player=target_player
-            ),
+            action_report_string,
             with_markup=True,
         )
 
@@ -153,20 +157,32 @@ class ResistanceCoupGameHandler:
     ):
         # Player being challenged reveals the card
         print_texts(f"{player_being_challenged} reveals their ", (f"{card}", card.style), " card!")
-        print_text(f"{challenger} loses the challenge")
+        reveal_append_text = f"{player_being_challenged} reveals their {card} card!"
+        self._round_history.append(reveal_append_text)
+
+        lose_text = f"{challenger} loses the challenge"
+        print_text(lose_text)
+        self._round_history.append(lose_text)
 
         # Challenge player loses influence (chooses a card to remove)
-        challenger.remove_card()
+        removed_card_text = challenger.remove_card()
+        self._round_history.append(removed_card_text)
 
         # Player puts card into the deck and gets a new card
-        print_text(f"{player_being_challenged} gets a new card")
+        new_card_text = f"{player_being_challenged} gets a new card"
+        print_text(new_card_text)
+        self._round_history.append(new_card_text)
         self._swap_card(player_being_challenged, card)
 
     def _challenge_against_player_succeeded(self, player_being_challenged: BasePlayer):
         print_text(f"{player_being_challenged} bluffed! They do not have the required card!")
+        self._round_history.append(
+            f"{player_being_challenged} bluffed! They do not have the required card!"
+        )
 
         # Player being challenged loses influence (chooses a card to remove)
-        player_being_challenged.remove_card()
+        removed_card_text = player_being_challenged.remove_card()
+        self._round_history.append(removed_card_text)
 
     def _challenge_phase(
         self,
@@ -174,12 +190,15 @@ class ResistanceCoupGameHandler:
         player_being_challenged: BasePlayer,
         action_being_challenged: Union[Action, CounterAction],
     ) -> ChallengeResult:
+        # appended to round history
         # Every player can choose to challenge
         for challenger in other_players:
             should_challenge = challenger.determine_challenge(player_being_challenged)
             if should_challenge:
                 if challenger.is_ai:
-                    print_text(f"{challenger} is challenging {player_being_challenged}!")
+                    text = f"{challenger} is challenging {player_being_challenged}!"
+                    self._round_history.append(text)
+                    print_text(text)
                 # Player being challenged has the card
                 if card := player_being_challenged.find_card(
                     action_being_challenged.associated_card_type
@@ -207,13 +226,15 @@ class ResistanceCoupGameHandler:
             should_counter = countering_player.determine_counter(self.current_player)
             if should_counter:
                 target_counter = get_counter_action(target_action.action_type)
-                print_text(
-                    build_counter_report_string(
-                        target_player=self.current_player,
-                        counter=target_counter,
-                        countering_player=countering_player,
-                    )
+
+                report_text = build_counter_report_string(
+                    target_player=self.current_player,
+                    counter=target_counter,
+                    countering_player=countering_player,
                 )
+                print_text(report_text)
+
+                self._round_history.append(report_text)
 
                 return countering_player, target_counter
 
@@ -222,36 +243,48 @@ class ResistanceCoupGameHandler:
     def _execute_action(
         self, action: Action, target_player: BasePlayer, countered: bool = False
     ) -> None:
+        # appends to round history
         match action.action_type:
             case ActionType.income:
                 # Player gets 1 coin
                 self._take_coin_from_treasury(self.current_player, 1)
                 print_text(f"{self.current_player}'s coins are increased by 1")
+                self._round_history.append(f"{self.current_player}'s coins are increased by 1")
             case ActionType.foreign_aid:
                 if not countered:
                     # Player gets 2 coin
                     self._take_coin_from_treasury(self.current_player, 2)
                     print_text(f"{self.current_player}'s coins are increased by 2")
+                    self._round_history.append(f"{self.current_player}'s coins are increased by 2")
             case ActionType.coup:
                 # Player pays 7 coin
                 self._give_coin_to_treasury(self.current_player, 7)
                 print_text(
                     f"{self.current_player} pays 7 coins and performs the coup against {target_player}"
                 )
+                self._round_history.append(
+                    f"{self.current_player} pays 7 coins and performs the coup against {target_player}"
+                )
 
                 if target_player.cards:
                     # Target player loses influence
-                    target_player.remove_card()
+                    removed_card_text = target_player.remove_card()
+                    self._round_history.append(removed_card_text)
             case ActionType.tax:
                 # Player gets 3 coins
                 self._take_coin_from_treasury(self.current_player, 3)
                 print_text(f"{self.current_player}'s coins are increased by 3")
+                self._round_history.append(f"{self.current_player}'s coins are increased by 3")
             case ActionType.assassinate:
                 # Player pays 3 coin
                 self._give_coin_to_treasury(self.current_player, 3)
                 if not countered and target_player.cards:
                     print_text(f"{self.current_player} assassinates {target_player}")
-                    target_player.remove_card()
+                    self._round_history.append(
+                        f"{self.current_player} assassinates {target_player}"
+                    )
+                    removed_card_text = target_player.remove_card()
+                    self._round_history.append(removed_card_text)
             case ActionType.steal:
                 if not countered:
                     # Take 2 (or all) coins from a player
@@ -261,10 +294,14 @@ class ResistanceCoupGameHandler:
                     print_text(
                         f"{self.current_player} steals {steal_amount} coins from {target_player}"
                     )
+                    self._round_history.append(
+                        f"{self.current_player} steals {steal_amount} coins from {target_player}"
+                    )
             case ActionType.exchange:
                 # Get 2 random cards from deck
                 cards = [self._deck.pop(), self._deck.pop()]
                 first_card, second_card = self.current_player.choose_exchange_cards(cards)
+                self._round_history.append(f"{self.current_player} exchanges 2 cards")
                 self._deck.append(first_card)
                 self._deck.append(second_card)
 
@@ -272,9 +309,11 @@ class ResistanceCoupGameHandler:
         players_without_current = self._players_without_player(self.current_player)
 
         # Choose an action to perform
+        # action is appended to round history
         target_action, target_player = self._action_phase(players_without_current)
 
         # Opportunity to challenge action
+        # result is appended to round history
         challenge_result = ChallengeResult.no_challenge
         if target_action.can_be_challenged:
             challenge_result = self._challenge_phase(
@@ -296,6 +335,7 @@ class ResistanceCoupGameHandler:
 
             # Opportunity to counter
             else:
+                # appended to round history
                 countering_player, counter = self._counter_phase(
                     players_without_current, target_action
                 )
@@ -326,6 +366,7 @@ class ResistanceCoupGameHandler:
         while player := self._remove_defeated_player():
             if player.is_ai:
                 print_text(f"{player} was defeated! :skull: :skull: :skull:", with_markup=True)
+                self._round_history.append(f"{player} was defeated!!!")
             else:
                 # Our human was defeated
                 print_text("You were defeated! :skull: :skull: :skull:", with_markup=True)
@@ -345,3 +386,7 @@ class ResistanceCoupGameHandler:
 
         # No winner yet
         return False
+
+    def reset_round_history(self):
+        print("Resetting round history...")
+        self._round_history = []
