@@ -2,3 +2,4 @@
 ignore = W293
 max-line-length = 120
 max-complexity = 12
+exclude = src/models/players/gpt/prompts.py

@@ -18,7 +18,6 @@ class HumanPlayer(BasePlayer):
     def _choose_action(
         self, other_players: List[BasePlayer]
     ) -> Tuple[Action, Optional[BasePlayer]]:
-
         available_actions = self.available_actions()
 
         print_tree(
@@ -33,7 +32,6 @@ class HumanPlayer(BasePlayer):
         # Only certain actions can target players
         if target_action.requires_target:
             if len(other_players) > 1:
-
                 print_tree(
                     "You can target any of the following players:",
                     [
@@ -101,7 +99,9 @@ class HumanPlayer(BasePlayer):
         discarded_card = self.cards.pop(int(chosen_card_ind))
 
         print_texts(
-            f"{self} discarded their ", (f"{discarded_card}", discarded_card.style), " card"
+            f"{self} discarded their ",
+            (f"{discarded_card}", discarded_card.style),
+            " card",
         )
 
     def choose_exchange_cards(self, exchange_cards: list[Card]) -> Tuple[Card, Card]:

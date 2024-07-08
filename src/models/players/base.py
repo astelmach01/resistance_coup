@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 
@@ -47,7 +47,13 @@ class BasePlayer(BaseModel, ABC):
         if self.coins >= 10:
             return [CoupAction()]
 
-        actions = [IncomeAction(), ForeignAidAction(), TaxAction(), StealAction(), ExchangeAction()]
+        actions = [
+            IncomeAction(),
+            ForeignAidAction(),
+            TaxAction(),
+            StealAction(),
+            ExchangeAction(),
+        ]
         if self.coins >= 7:
             actions.append(CoupAction())
 
@@ -65,7 +71,10 @@ class BasePlayer(BaseModel, ABC):
 
     @abstractmethod
     def choose_action(
-        self, other_players: List["BasePlayer"]
+        self,
+        other_players: List["BasePlayer"],
+        round_history: List[str],
+        current_game_state: Union[str, Dict[str, str]],
     ) -> Tuple[Action, Optional["BasePlayer"]]:
         """Choose the next action to perform"""
         pass

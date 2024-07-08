@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List, Union
 
 from rich.panel import Panel
 from rich.table import Column, Table
@@ -9,51 +9,74 @@ from src.models.players.human import BasePlayer
 
 
 def generate_state_panel(
-    deck: list[Card], treasury_coins: int, current_player: BasePlayer
-) -> Panel:
-    """Generate a panel showing some game information"""
-    return Panel(
-        f"""
+    deck: List[Card], treasury_coins: int, current_player: BasePlayer, rich: bool = True
+) -> Union[Panel, Dict[str, Union[int, str]]]:
+    """Generate a panel or dictionary showing game information"""
+    if rich:
+        return Panel(
+            f"""
 :game_die: Deck: {len(deck)} cards
-
 :moneybag: Treasury: {treasury_coins} coins
-
 :person_tipping_hand: Current Player: [bold magenta]{current_player}
 """,
-        width=50,
-    )
+            width=50,
+        )
+    else:
+        return {
+            "deck_size": len(deck),
+            "treasury_coins": treasury_coins,
+            "current_player": str(current_player),
+        }
 
 
-def generate_players_table(players: List[BasePlayer], current_player_index: int) -> Table:
-    """Generate a table of the players"""
+def generate_players_table(
+    players: List[BasePlayer], current_player_index: int, rich: bool = True
+) -> Union[Table, List[Dict[str, Union[str, int, bool, List[str]]]]]:
+    """Generate a table or list of dictionaries of the players"""
+    if rich:
+        table = Table("Players", "Coins", Column(header="Cards", justify="center", min_width=40))
+        for ind, player in enumerate(players):
+            if player.is_ai:
+                player_text = Text.from_markup(f":robot: {str(player)}")
+            else:
+                player_text = Text.from_markup(f":grimacing: {str(player)}")
+            if ind == current_player_index:
+                player_text.stylize("bold magenta")
+            coin_text = Text(str(player.coins), style="gray")
+            card_text = Text()
+            if player.is_active:
+                for card in player.cards:
+                    if player.is_ai and ind != current_player_index:
+                        card_text.append("<Secret...> ")
+                    else:
+                        card_text.append(
+                            str(card),
+                            style=f"{card.foreground_color} on {card.background_color}",
+                        )
+                        card_text.append(" ")
+            else:
+                card_text = Text.from_markup(":skull:")
+            table.add_row(player_text, coin_text, card_text)
+        return table
+    else:
+        players_info = []
+        for ind, player in enumerate(players):
+            player_info = {
+                "name": str(player),
+                "is_currently_going": ind == current_player_index,
+                "coins": player.coins,
+                "eliminated": not player.is_active,
+            }
 
-    table = Table("Players", "Coins", Column(header="Cards", justify="center", min_width=40))
-    for ind, player in enumerate(players):
-        if player.is_ai:
-            player_text = Text.from_markup(f":robot: {str(player)}")
-        else:
-            player_text = Text.from_markup(f":grimacing: {str(player)}")
-
-        if ind == current_player_index:
-            player_text.stylize("bold magenta")
-
-        coin_text = Text(str(player.coins), style="gray")
-
-        card_text = Text()
-        if player.is_active:
-            for card in player.cards:
-                if (
-                    player.is_ai and ind != current_player_index
-                ):  # remove the second part of the condition if using humanplayer
-                    card_text.append("<Secret...> ")
+            if player.is_active:
+                # remove the ind != current_player_index check if back to using humans
+                if player.is_ai and ind != current_player_index:
+                    player_info["cards"] = ["<Secret...>"] * len(player.cards)
                 else:
-                    card_text.append(
-                        str(card), style=f"{card.foreground_color} on {card.background_color}"
-                    )
-                    card_text.append(" ")
-        else:
-            card_text = Text.from_markup(":skull:")
+                    player_info["cards"] = [str(card) for card in player.cards]
+            else:
+                player_info["cards"] = ["<Eliminated>"]
 
-        table.add_row(player_text, coin_text, card_text)
+            players_info.append(player_info)
 
-    return table
+        return players_info

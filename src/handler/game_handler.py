@@ -136,10 +136,23 @@ class ResistanceCoupGameHandler:
         self, players_without_current: list[BasePlayer]
     ) -> Tuple[Action, Optional[BasePlayer]]:
         # Player chooses action
-        target_action, target_player = self.current_player.choose_action(players_without_current)
+        current_game_state = {
+            "players": str(
+                generate_players_table(self._players, self._current_player_index, rich=False)
+            ),
+            "game_state": str(
+                generate_state_panel(self._deck, self._treasury, self.current_player, rich=False)
+            ),
+        }
+
+        target_action, target_player = self.current_player.choose_action(
+            players_without_current, self._round_history, current_game_state
+        )
 
         action_report_string = build_action_report_string(
-            player=self.current_player, action=target_action, target_player=target_player
+            player=self.current_player,
+            action=target_action,
+            target_player=target_player,
         )
 
         print_text(
@@ -155,7 +168,11 @@ class ResistanceCoupGameHandler:
         self, player_being_challenged: BasePlayer, card: Card, challenger: BasePlayer
     ):
         # Player being challenged reveals the card
-        print_texts(f"{player_being_challenged} reveals their ", (f"{card}", card.style), " card!")
+        print_texts(
+            f"{player_being_challenged} reveals their ",
+            (f"{card}", card.style),
+            " card!",
+        )
         reveal_append_text = f"{player_being_challenged} reveals their {card} card!"
         self._round_history.append(reveal_append_text)
 

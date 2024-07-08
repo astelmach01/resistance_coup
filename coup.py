@@ -53,7 +53,6 @@ def main():
         end_state = False
         turn_count = 1
         while not end_state:
-
             handler.print_game_state()
 
             console.print()

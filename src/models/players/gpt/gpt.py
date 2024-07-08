@@ -1,27 +1,51 @@
 import random
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
+
+from autogen import ConversableAgent, GroupChatManager
 
 from src.models.action import Action
 from src.models.card import Card
 from src.models.players.base import BasePlayer
+from src.models.players.gpt.agents import build_agent
 from src.utils.print import print_text, print_texts
 
 
 class GPTPlayer(BasePlayer):
-
     is_ai: bool = True
 
-    def choose_action(self, other_players: List[BasePlayer]) -> Tuple[Action, Optional[BasePlayer]]:
+    def choose_action(
+        self,
+        other_players: List["BasePlayer"],
+        round_history: List[str],
+        current_game_state: Union[str, Dict[str, str]],
+    ) -> Tuple[Action, Optional["BasePlayer"]]:
         available_actions = self.available_actions()
 
-        print_text(f"[bold magenta]{self}[/] is thinking...", with_markup=True)
-        # time.sleep(1)
+        agent: GroupChatManager = build_agent(
+            self.name,
+            available_actions,
+            other_players,
+            round_history,
+            current_game_state,
+            self.coins,
+        )
 
+        print_text(f"[bold magenta]{self}[/] is thinking...", with_markup=True)
         # Coup is only option
         if len(available_actions) == 1:
             player = random.choice(other_players)
             return available_actions[0], player
 
+        user_agent = ConversableAgent(
+            name="Initiator",
+            llm_config=None,
+            human_input_mode="NEVER",
+            code_execution_config=False,
+        )
+
+        result = user_agent.initiate_chat(agent, message="What should I do?")
+        print(result)
+        exit()
         # Pick any other random choice (might be a bluff)
         target_action = random.choice(available_actions)
         target_player = None
@@ -54,7 +78,11 @@ class GPTPlayer(BasePlayer):
 
         # Remove a random card
         discarded_card = self.cards.pop(random.randrange(len(self.cards)))
-        print_texts(f"{self} discards their ", (f"{discarded_card}", discarded_card.style), " card")
+        print_texts(
+            f"{self} discards their ",
+            (f"{discarded_card}", discarded_card.style),
+            " card",
+        )
         return f"{self} discards their {discarded_card} card"
 
     def choose_exchange_cards(self, exchange_cards: list[Card]) -> Tuple[Card, Card]:
