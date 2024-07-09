@@ -110,6 +110,7 @@ def build_agent(
         verifier_prompt.replace("{{GAME_RULES}}", game_rules)
         .replace("{{CURRENT_GAME_STATE}}", str(current_game_state))
         .replace("{{PREVIOUS_TURNS}}", "\n".join(round_history))
+        .replace("{{AVAILABLE_ACTIONS}}", formatted_actions)
     )
 
     verifier_agent = build_verifier_agent(verifier_formatted_string)

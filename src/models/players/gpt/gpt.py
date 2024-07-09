@@ -45,7 +45,10 @@ class GPTPlayer(BasePlayer):
             code_execution_config=False,
         )
 
-        _ = user_agent.initiate_chat(group_chat_manager, message=f"It is my move as {self.name}")
+        _ = user_agent.initiate_chat(
+            group_chat_manager,
+            message=f"It is my move as {self.name} and I have {self._pretty_print_cards()} in my hand",
+        )  # noqa
         print()
 
         agent_last_message = group_chat_manager.last_message(agents["action_parser_agent"])
@@ -60,7 +63,10 @@ class GPTPlayer(BasePlayer):
             chosen_action_type = target_action.lower().replace("action", "")
             chosen_action_type = ActionType[chosen_action_type]
         except KeyError:
-            print(f"Error: Invalid action name '{chosen_action_type}'")
+            print_text(
+                f"Error: invalid action name, {chosen_action_type}. Available actions: {available_actions}",
+                style="red",
+            )
             return None, None
 
         # Match the chosen action type to an available action
@@ -108,7 +114,7 @@ class GPTPlayer(BasePlayer):
     ) -> bool:
         """Choose whether to challenge the current player making the move"""
 
-        available_actions = "Challenge player action: True or False. \nTrue: challenge the player's action. \nFalse: do not challenge the player's action."  # noqa
+        available_actions = "Challenge player action: True or False. \nTrue: challenge the player's action. \nFalse: do not challenge the player's action. The JSON dict returned should ONLY be '{action: True/False}'"  # noqa
 
         group_chat_manager, agents = build_agent(
             self.name,
@@ -129,7 +135,7 @@ class GPTPlayer(BasePlayer):
 
         _ = user_agent.initiate_chat(
             group_chat_manager,
-            message=f"It is my chance to challenge the most recent action taken by {player_being_challenged.name} as {self.name}",  # noqa
+            message=f"It is my chance to challenge the most recent action taken by {player_being_challenged.name} as {self.name}. I have {self._pretty_print_cards()} in my hand",  # noqa
         )
         print()
 
@@ -152,7 +158,7 @@ class GPTPlayer(BasePlayer):
                 return False
 
         else:
-            print(f"Error: Invalid action name '{target_action}'")
+            print_text(f"Error: invalid  challenge action '{target_action}'", style="red")
             time.sleep(1)
             return False
 
@@ -165,7 +171,7 @@ class GPTPlayer(BasePlayer):
     ) -> bool:
         """Choose whether to counter the current player making the move"""
 
-        available_actions = "Counter player action: True or False. \nTrue: Counter the player's action. \nFalse: do not counter the player's action."  # noqa
+        available_actions = "Counter player action: True or False. \nTrue: Counter the player's action. \nFalse: do not counter the player's action. The JSON dict returned should ONLY be '{action: True/False}'"  # noqa
 
         group_chat_manager, agents = build_agent(
             self.name,
@@ -186,7 +192,7 @@ class GPTPlayer(BasePlayer):
 
         _ = user_agent.initiate_chat(
             group_chat_manager,
-            message=f"It is my chance to counter the most recent action taken by {player_being_challenged.name} as {self.name}",  # noqa
+            message=f"It is my chance to counter the most recent action taken by {player_being_challenged.name} as {self.name}. I have {self._pretty_print_cards()} in my hand",  # noqa
         )
         print()
 
@@ -209,7 +215,7 @@ class GPTPlayer(BasePlayer):
                 return False
 
         else:
-            print(f"Error: Invalid action name '{target_action}'")
+            print_text(f"Error: invalid counter action '{target_action}'", style="red")
             time.sleep(1)
             return False
 
@@ -218,7 +224,7 @@ class GPTPlayer(BasePlayer):
     ) -> str:
         """Choose a card and remove it from your hand"""
 
-        available_actions = f"Remove a card from your hand (zero indexed). Return 0 for the 1st card, 1 for the second card, etc. The index returned MUST be between the range 0 and {len(self.cards)}"  # noqa
+        available_actions = f"Remove a card from your hand (zero indexed). Return 0 for the 1st card, 1 for the second card, etc. The index returned MUST be between the range 0 and {len(self.cards)}. The JSON dict returned should ONLY have the key 'action' with the card number as the value'"  # noqa
 
         other_players = []
 
@@ -241,7 +247,7 @@ class GPTPlayer(BasePlayer):
 
         _ = user_agent.initiate_chat(
             group_chat_manager,
-            message=f"I am playing as {self.name} and I have to remove a card from my hand. My current deck is {self.cards}",  # noqa
+            message=f"I am playing as {self.name} and I have to remove a card from my hand. My current deck is {self._pretty_print_cards()}",  # noqa
         )
         print()
 
@@ -287,7 +293,7 @@ class GPTPlayer(BasePlayer):
         self.cards += exchange_cards
         random.shuffle(self.cards)
 
-        available_actions = f"Exchange 2 cards from your hand (zero indexed) as a list. For example, return [0,1] to remove the first and second card. To return the 1st and 3rd cards in the deck, return [1,3]. The indices returned MUST be between the range 0 and {len(self.cards)}, and the returned value MUST be a list of 2 integers only."  # noqa
+        available_actions = f"Exchange 2 cards from your hand (zero indexed) as a list. For example, return [0,1] to remove the first and second card. To return the 1st and 3rd cards in the deck, return [1,3]. The indices returned MUST be between the range 0 and {len(self.cards) - 1}, and the returned value MUST be a list of 2 integers only that are unique. The JSON dict returned should ONLY have a key of 'action' with a value of a list of 2 valid integers"  # noqa
 
         other_players = []
 
@@ -310,7 +316,7 @@ class GPTPlayer(BasePlayer):
 
         _ = user_agent.initiate_chat(
             group_chat_manager,
-            message=f"I am playing as {self.name} and I have to exchange 2 cards. My current deck is {self.cards} after adding in the exchanged cards to my deck. The random cards I got from the deck were {exchange_cards}",  # noqa
+            message=f"I am playing as {self.name} and I have to exchange 2 cards. My current deck is {self._pretty_print_cards()} after adding in the exchanged cards to my deck. The random cards I got from the deck were {exchange_cards}",  # noqa
         )
         print()
 
@@ -336,6 +342,11 @@ class GPTPlayer(BasePlayer):
 
         if index1 < 0 or index1 >= len(self.cards) or index2 < 0 or index2 >= len(self.cards):
             print(f"Error: Invalid index '{index1}' or '{index2}'")
+            time.sleep(1)
+            exit()
+
+        if index1 == index2:
+            print(f"Error: Cannot exchange the same card '{index1}' and '{index2}'")
             time.sleep(1)
             exit()
 

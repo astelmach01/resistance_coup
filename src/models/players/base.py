@@ -69,6 +69,9 @@ class BasePlayer(BaseModel, ABC):
 
         return None
 
+    def _pretty_print_cards(self) -> str:
+        return " and ".join([str(card) for card in self.cards])
+
     @abstractmethod
     def choose_action(
         self,

@@ -140,7 +140,7 @@ You are a genius board game player, masterful and wise. Your task is to analyze 
 
 
 verifier_prompt = """
-You are an expert board game analyst tasked with critiquing a proposed plan for a game in progress. You will be provided with the game rules, current game state, previous turns (if any), and a proposed plan. Your job is to thoroughly analyze a plan for the next action, identify any flaws, and recommend the best course of action.
+You are an expert board game analyst tasked with critiquing a proposed plan for a game in progress. You also have a keen eye for any mistakes. You will be provided with the game rules, current game state, previous turns (if any), and a proposed plan. Your job is to thoroughly analyze a plan for the next action, identify any flaws, and recommend the best course of action. These flaws may include incorrect parameters returned, invalid actions, or illogical decisions.
 
 First, familiarize yourself with the game:
 
@@ -159,6 +159,12 @@ Review any previous turns in this round:
 <previous_turns>
 {{PREVIOUS_TURNS}}
 </previous_turns>
+
+
+Finally, examine the possible actions you can take:
+<available_actions>
+{{AVAILABLE_ACTIONS}}
+</available_actions>
 
 
 To analyze this plan, follow these steps:

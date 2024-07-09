@@ -217,8 +217,29 @@ class ResistanceCoupGameHandler:
             f"{player_being_challenged} bluffed! They do not have the required card!"
         )
 
+        current_game_state = {
+            "players": str(
+                generate_players_table(
+                    self._players,
+                    self._players.index(player_being_challenged),
+                    rich=False,
+                    challenged_player=player_being_challenged,
+                )
+            ),
+            "game_state": str(
+                generate_state_panel(
+                    self._deck,
+                    self._treasury,
+                    self.current_player,
+                    rich=False,
+                )
+            ),
+        }
+
         # Player being challenged loses influence (chooses a card to remove)
-        removed_card_text = player_being_challenged.remove_card()
+        removed_card_text = player_being_challenged.remove_card(
+            self._round_history, current_game_state
+        )
         self._round_history.append(removed_card_text)
 
     def _challenge_phase(
@@ -229,8 +250,8 @@ class ResistanceCoupGameHandler:
     ) -> ChallengeResult:
         # appended to round history
         # Every player can choose to challenge
-
         for challenger in other_players:
+
             player_index = self._players.index(challenger)
             current_game_state = {
                 "players": str(
@@ -352,7 +373,26 @@ class ResistanceCoupGameHandler:
 
                 if target_player.cards:
                     # Target player loses influence
-                    removed_card_text = target_player.remove_card()
+                    current_game_state = {
+                        "players": str(
+                            generate_players_table(
+                                self._players,
+                                self._current_player_index,
+                                rich=False,
+                            )
+                        ),
+                        "game_state": str(
+                            generate_state_panel(
+                                self._deck,
+                                self._treasury,
+                                self.current_player,
+                                rich=False,
+                            )
+                        ),
+                    }
+                    removed_card_text = target_player.remove_card(
+                        self._round_history, current_game_state
+                    )
                     self._round_history.append(removed_card_text)
             case ActionType.tax:
                 # Player gets 3 coins
@@ -367,7 +407,27 @@ class ResistanceCoupGameHandler:
                     self._round_history.append(
                         f"{self.current_player} assassinates {target_player}"
                     )
-                    removed_card_text = target_player.remove_card()
+
+                    current_game_state = {
+                        "players": str(
+                            generate_players_table(
+                                self._players,
+                                self._current_player_index,
+                                rich=False,
+                            )
+                        ),
+                        "game_state": str(
+                            generate_state_panel(
+                                self._deck,
+                                self._treasury,
+                                self.current_player,
+                                rich=False,
+                            )
+                        ),
+                    }
+                    removed_card_text = target_player.remove_card(
+                        self._round_history, current_game_state
+                    )
                     self._round_history.append(removed_card_text)
             case ActionType.steal:
                 if not countered:
