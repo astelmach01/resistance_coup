@@ -4,13 +4,7 @@ from rich.panel import Panel
 from rich.text import Text
 
 from src.handler.game_handler import ResistanceCoupGameHandler
-from src.utils.print import (
-    console,
-    print_blank,
-    print_confirm,
-    print_prompt,
-    print_text,
-)
+from src.utils.print import console, print_blank, print_confirm, print_text
 
 console.clear()
 
@@ -45,11 +39,11 @@ def main():
     console.print(panel)
 
     console.print()
-    player_name = print_prompt("What is your name, player?")
-    handler = ResistanceCoupGameHandler(player_name, 5)
+    handler = ResistanceCoupGameHandler(4)
 
     console.print()
-    game_ready = print_confirm("Ready to start?")
+    console.print("Starting game...")
+    game_ready = True
 
     # Play the game
     while game_ready:
@@ -57,10 +51,8 @@ def main():
 
         # Take turns until we have a winner
         end_state = False
-        turn_count = 0
+        turn_count = 1
         while not end_state:
-            turn_count += 1
-
             handler.print_game_state()
 
             console.print()
@@ -68,6 +60,17 @@ def main():
             console.print(panel)
 
             end_state = handler.handle_turn()
+            print_text(f"==========Round history: {handler._round_history}=========")
+
+            active_players = []
+            for player in handler._players:
+                if player.is_active:
+                    active_players.append(player)
+            # if all active players have made a move, reset the history of the round
+            if turn_count % len(active_players) == 0:
+                handler.reset_round_history()
+
+            turn_count += 1
 
         console.print()
         game_ready = print_confirm("Want to play again?")

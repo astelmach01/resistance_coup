@@ -8,7 +8,7 @@ from src.models.card import CardType
 
 class ActionType(str, Enum):
     income = "Income"
-    foreign_aid = "Foreign Aid"
+    foreignaid = "Foreign Aid"
     coup = "Coup"
     tax = "Tax"
     assassinate = "Assassinate"
@@ -38,7 +38,7 @@ class IncomeAction(Action):
 
 
 class ForeignAidAction(Action):
-    action_type: ActionType = ActionType.foreign_aid
+    action_type: ActionType = ActionType.foreignaid
     can_be_countered: bool = True
 
 
@@ -100,7 +100,7 @@ class BlockStealCounterAction(CounterAction):
 
 def get_counter_action(action_type: ActionType) -> CounterAction:
     return {
-        ActionType.foreign_aid: BlockForeignAidCounterAction(),
+        ActionType.foreignaid: BlockForeignAidCounterAction(),
         ActionType.steal: BlockStealCounterAction(),
         ActionType.assassinate: BlockAssassinationCounterAction(),
     }[action_type]

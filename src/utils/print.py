@@ -85,24 +85,22 @@ def print_confirm(content: str) -> bool:
 def build_action_report_string(
     player: BasePlayer, action: Action, target_player: BasePlayer
 ) -> str:
-    action_report_string = f"[bold magenta]{player}[/] chose to "
+    action_report_string = f"{player} chose to "
     match action.action_type:
         case ActionType.income:
             action_report_string += "take income."
-        case ActionType.foreign_aid:
+        case ActionType.foreignaid:
             action_report_string += "take foreign aid."
         case ActionType.coup:
             action_report_string += f"perform a coup against {target_player.name}."
         case ActionType.tax:
-            action_report_string += "take tax because they have influence over a Duke."
+            action_report_string += "take tax."
         case ActionType.assassinate:
             action_report_string += f"assassinate {target_player.name}."
         case ActionType.steal:
             action_report_string += f"steal coin from {target_player.name}"
         case ActionType.exchange:
-            action_report_string += (
-                "perform an exchange, because they have influence over an Ambassador."
-            )
+            action_report_string += "perform an exchange."
 
     return action_report_string
 

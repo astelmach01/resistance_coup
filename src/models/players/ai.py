@@ -1,6 +1,5 @@
 import random
-import time
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from src.models.action import Action
 from src.models.card import Card
@@ -11,13 +10,18 @@ from src.utils.print import print_text, print_texts
 class AIPlayer(BasePlayer):
     is_ai: bool = True
 
-    def choose_action(self, other_players: List[BasePlayer]) -> Tuple[Action, Optional[BasePlayer]]:
+    def choose_action(
+        self,
+        other_players: List["BasePlayer"],
+        round_history: List[str],
+        current_game_state: Union[str, Dict[str, str]],
+    ) -> Tuple[Action, Optional["BasePlayer"]]:
         """Choose the next action to perform"""
 
         available_actions = self.available_actions()
 
         print_text(f"[bold magenta]{self}[/] is thinking...", with_markup=True)
-        time.sleep(1)
+        # time.sleep(1)
 
         # Coup is only option
         if len(available_actions) == 1:
@@ -51,12 +55,17 @@ class AIPlayer(BasePlayer):
         # 10% chance of countering
         return random.randint(0, 9) == 0
 
-    def remove_card(self) -> None:
+    def remove_card(self) -> str:
         """Choose a card and remove it from your hand"""
 
         # Remove a random card
         discarded_card = self.cards.pop(random.randrange(len(self.cards)))
-        print_texts(f"{self} discards their ", (f"{discarded_card}", discarded_card.style), " card")
+        print_texts(
+            f"{self} discards their ",
+            (f"{discarded_card}", discarded_card.style),
+            " card",
+        )
+        return f"{self} discards their {discarded_card} card"
 
     def choose_exchange_cards(self, exchange_cards: list[Card]) -> Tuple[Card, Card]:
         """Perform the exchange action. Pick which 2 cards to send back to the deck"""
