@@ -161,7 +161,7 @@ Review any previous turns in this round:
 </previous_turns>
 
 
-Finally, examine the possible actions you can take:
+Finally, examine the possible actions you can take and make sure we can take ONLY one of the following actions:
 <available_actions>
 {{AVAILABLE_ACTIONS}}
 </available_actions>
@@ -181,15 +181,18 @@ After your analysis, provide your final recommendation for the action that shoul
 Your entire response should be structured as follows:
 
 <response>
+
 <analysis>
 <step>Step 1 analysis...</step>
 <step>Step 2 analysis...</step>
+<step>Step 3 analysis...</step>
 ...
 </analysis>
 
 <recommendation>
 Final recommended action...
 </recommendation>
+
 </response>
 
 Remember to base your analysis and recommendation solely on the information provided in the game rules, game state, previous turns, and proposed plan. Do not introduce any external information or assumptions not included in these inputs. If the action requires a targeted player, ensure that player's name is clearly identified in your recommendation.

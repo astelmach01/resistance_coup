@@ -62,7 +62,10 @@ def main():
             end_state = handler.handle_turn()
             print_text(f"==========Round history: {handler._round_history}=========")
 
-            active_players = [player for player in handler._players if player.is_active]
+            active_players = []
+            for player in handler._players:
+                if player.is_active:
+                    active_players.append(player)
             # if all active players have made a move, reset the history of the round
             if turn_count % len(active_players) == 0:
                 handler.reset_round_history()
