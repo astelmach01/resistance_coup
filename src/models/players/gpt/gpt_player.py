@@ -9,11 +9,13 @@ from src.models.action import Action, ActionType
 from src.models.card import Card
 from src.models.players.base import BasePlayer
 from src.models.players.gpt.agents import build_agent
+from src.models.players.gpt.notes import Notes, take_notes
 from src.utils.print import print_text, print_texts
 
 
 class GPTPlayer(BasePlayer):
     is_ai: bool = True
+    notes: Notes = Notes()
 
     def choose_action(
         self,
@@ -21,6 +23,9 @@ class GPTPlayer(BasePlayer):
         round_history: List[str],
         current_game_state: Union[str, Dict[str, str]],
     ) -> Tuple[Action, Optional[BasePlayer]]:
+
+        take_notes(self.notes, current_game_state, round_history, self.name)
+
         available_actions = self.available_actions()
 
         group_chat_manager, agents = build_agent(
@@ -30,6 +35,7 @@ class GPTPlayer(BasePlayer):
             round_history,
             current_game_state,
             self.coins,
+            notes=self.notes.format_notes(),
         )
 
         print_text(f"[bold magenta]{self}[/] is thinking...", with_markup=True)
@@ -52,11 +58,8 @@ class GPTPlayer(BasePlayer):
         print()
 
         agent_last_message = group_chat_manager.last_message(agents["action_parser_agent"])
-        print(f"Agent Last Message: {agent_last_message}")
 
         arguments = json.loads(agent_last_message["content"])
-
-        print(f"Parsed Arguments: {arguments}")
         target_action = arguments["action"]
 
         try:
@@ -123,6 +126,7 @@ class GPTPlayer(BasePlayer):
             round_history,
             current_game_state,
             self.coins,
+            notes=self.notes.format_notes(),
             format_actions=False,
         )
 
@@ -140,11 +144,8 @@ class GPTPlayer(BasePlayer):
         print()
 
         agent_last_message = group_chat_manager.last_message(agents["action_parser_agent"])
-        print(f"Agent Last Message: {agent_last_message}")
 
         arguments = json.loads(agent_last_message["content"])
-
-        print(f"Parsed Arguments: {arguments}")
         target_action = arguments["action"]
 
         # can be True, False, or a string "True" or "False", so parse both types
@@ -180,6 +181,7 @@ class GPTPlayer(BasePlayer):
             round_history,
             current_game_state,
             self.coins,
+            notes=self.notes.format_notes(),
             format_actions=False,
         )
 
@@ -194,14 +196,10 @@ class GPTPlayer(BasePlayer):
             group_chat_manager,
             message=f"It is my chance to counter the most recent action taken by {player_being_challenged.name} as {self.name}. I have {self._pretty_print_cards()} in my hand",  # noqa
         )
-        print()
 
         agent_last_message = group_chat_manager.last_message(agents["action_parser_agent"])
-        print(f"Agent Last Message: {agent_last_message}")
 
         arguments = json.loads(agent_last_message["content"])
-
-        print(f"Parsed Arguments: {arguments}")
         target_action = arguments["action"]
 
         # can be True, False, or a string "True" or "False", so parse both types
@@ -235,6 +233,7 @@ class GPTPlayer(BasePlayer):
             round_history,
             current_game_state,
             self.coins,
+            notes=self.notes.format_notes(),
             format_actions=False,
         )
 
@@ -304,6 +303,7 @@ class GPTPlayer(BasePlayer):
             round_history,
             current_game_state,
             self.coins,
+            notes=self.notes.format_notes(),
             format_actions=False,
         )
 
