@@ -1,0 +1,19 @@
+Minnie:
+	1. Suspected Cards: Duke (High confidence).
+	2. Strategy Note: Minnie successfully revealed Duke when challenged by William, likely to leverage Duke abilities (blocking Foreign Aid, taking Tax actions).
+William:
+	1. Suspected Cards: Duke (High confidence).
+	2. Suspected Cards: Unknown card.
+	3. Strategy Note: William successfully revealed Duke when challenged by Minnie, likely to use Duke to block Foreign Aid and take Tax actions.
+	4. Strategy Note: William discarded a Captain card, no longer has Steal abilities. His strategy might evolve around his new card.
+	5. Suspected Cards: Duke (Low confidence)
+	6. Suspected Cards: Ambassador (Low confidence)
+	7. Likely gathering information or positioning for a stronger bluff. May be trying to obtain cards for a specific strategy, i.e., acquiring an Assassin to threaten eliminations or an Ambassador to guard against stealing.
+Theresa:
+	1. Suspected Cards: Unknown cards. Theresa's cards have not been revealed or challenged.
+	2. Strategy Note: With only 2 coins, Theresa will likely attempt to gain coins via Income or Foreign Aid, or position herself to counteract actions if she has the relevant cards.
+	3. Suspected Cards: Captain (Low confidence)
+	4. Suspected Cards: Contessa (Low confidence)
+	5. May be cautious, given she hasn’t yet taken aggressive actions. Potentially positioning for a counteraction against a steal or assassination.
+	6. Suspected Cards: Possibly Duke (Low confidence). Focus seems to be on accumulating coins as indicated by the 7 coins currently held. Could also have Ambassador or Captain for their utility functions.
+	7. Strategy Notes: High likelihood of preparing for a high-impact move involving either Coin accumulation (Duke) or leveraging an Assassination or Coup soon. Needs careful monitoring of moves to detect true intentions.

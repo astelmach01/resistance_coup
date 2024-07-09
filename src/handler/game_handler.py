@@ -32,7 +32,7 @@ class ResistanceCoupGameHandler:
     _deck: List[Card] = []
     _number_of_players: int = 0
     _treasury: int = 0
-    _round_history: List[str] = []
+    _round_history: List[str] = ["Start of round"]
 
     def __init__(self, number_of_players: int):
         self._number_of_players = number_of_players
@@ -470,7 +470,7 @@ class ResistanceCoupGameHandler:
                 self._deck.append(first_card)
                 self._deck.append(second_card)
 
-    def handle_turn(self) -> bool:
+    def handle_turn(self) -> bool:  # noqa: C901
         players_without_current = self._players_without_player(self.current_player)
 
         # Choose an action to perform
@@ -547,11 +547,19 @@ class ResistanceCoupGameHandler:
             )
             return True
 
+        # Reset the round history after each player has taken a turn
+        if self.current_player == self.get_last_active_player():
+            self.reset_round_history()
+
         self._next_player()
 
         # No winner yet
         return False
 
+    def get_last_active_player(self) -> BasePlayer:
+        active_players = [player for player in self._players if player.is_active]
+        return active_players[-1]
+
     def reset_round_history(self):
         print("Resetting round history...")
-        self._round_history = []
+        self._round_history = ["Start of round"]

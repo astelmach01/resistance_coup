@@ -94,7 +94,7 @@ game_rules = """
 
 
 reasoning_prompt = """
-You are a genius board game player, masterful and wise. Your task is to analyze the current state of a game and determine the best next action/move to take in order to win. Follow these instructions carefully:
+You are a genius board game player, masterful and wise. Your task is to analyze the current state of a game, including notes on other players, and determine the best next action/move to take in order to win. Follow these instructions carefully:
 
 1. First, review the rules of the game:
 <game_rules>
@@ -116,13 +116,19 @@ You are a genius board game player, masterful and wise. Your task is to analyze 
 {{PREVIOUS_TURNS}}
 </previous_turns>
 
-5. Analyze the situation and determine the best next action:
+
+5.Review the notes taken on opposing players:
+<notes>
+{{PLAYER_NOTES}}
+</notes>
+
+6. Analyze the situation and determine the best next action:
    a. Consider the game rules, available actions, current game state, and previous turns (if any).
    b. Think through potential strategies and their outcomes.
    c. Evaluate the pros and cons of each possible action.
    d. Consider how your action might affect other players and their potential responses.
 
-6. Provide your analysis and decision in the following format:
+7. Provide your analysis and decision in the following format:
    <analysis>
    Step-by-step thought process leading to your decision. Include:
    - Key observations about the current game state
@@ -140,7 +146,7 @@ You are a genius board game player, masterful and wise. Your task is to analyze 
 
 
 verifier_prompt = """
-You are an expert board game analyst tasked with critiquing a proposed plan for a game in progress. You also have a keen eye for any mistakes. You will be provided with the game rules, current game state, previous turns (if any), and a proposed plan. Your job is to thoroughly analyze a plan for the next action, identify any flaws, and recommend the best course of action. These flaws may include incorrect parameters returned, invalid actions, or illogical decisions.
+You are an expert board game analyst tasked with critiquing a proposed plan for a game in progress. You also have a keen eye for any mistakes. You will be provided with the game rules, current game state, previous turns (if any), taken notes about opposing players, and a proposed plan. Your job is to thoroughly analyze a plan for the next action, identify any flaws, and recommend the best course of action. These flaws may include incorrect parameters returned, invalid actions, or illogical decisions.
 
 First, familiarize yourself with the game:
 
@@ -159,6 +165,11 @@ Review any previous turns in this round:
 <previous_turns>
 {{PREVIOUS_TURNS}}
 </previous_turns>
+
+Review the notes taken on opposing players:
+<notes>
+{{PLAYER_NOTES}}
+</notes>
 
 
 Finally, examine the possible actions you can take and make sure we can take ONLY one of the following actions:
@@ -221,3 +232,66 @@ You are tasked with generating a valid JSON dict based on reasoning steps for a 
 
 Remember to ensure that the action you choose is valid and present in the list of available actions. If the reasoning steps don't clearly match any available action, choose the closest logical match based on the context provided. Remember to generate valid JSON only.
 """
+
+
+note_prompt = """
+You are a professional board game player and note taker. Your task is to take detailed notes on what cards you think opposing players have in their hands and what their strategies might be. You will be given the rules of the game, the current state of the game, history of the round, and notes taken already. Based on this information, you will take and adjust notes accordingly.
+
+First, carefully read and internalize the rules of the game:
+<game_rules>
+{{GAME_RULES}}
+</game_rules>
+
+Next, review the current state of the game:
+<game_state>
+{{GAME_STATE}}
+</game_state>
+
+Now, examine the history of the round:
+<round_history>
+{{ROUND_HISTORY}}
+</round_history>
+
+
+Here's the notes that have already been taken:
+<player_notes>
+{{PLAYER_NOTES}}
+</player_notes>
+
+To complete your task, follow these steps:
+
+1. Analyze the game rules, current game state, and round history thoroughly.
+
+2. For each opposing player, create a section in your notes. Use the format:
+   <player_notes>
+   <player_name>[Player Name]</player_name>
+   <suspected_cards>[List of suspected cards in their hand]</suspected_cards>
+   <strategy_notes>[Notes on their possible strategy]</strategy_notes>
+   </player_notes>
+   
+   An example player note might be:  Suspected Cards: Duke (Low confidence). Active challenger with a recent Duke reveal and card exchange, strategy may evolve rapidly based on new card. Assumes bluffing might highlight Ambush-type actions.
+
+3. When listing suspected cards, include your confidence level for each card (High, Medium, Low).
+
+4. In the strategy notes, explain your reasoning for suspecting certain cards or strategies. Reference specific events from the round history to support your analysis.
+
+5. After each significant event or turn in the game, review and update your notes. Add new observations and adjust your previous assumptions if necessary.
+
+6. If you notice any patterns or potential strategies emerging, make sure to highlight these in your notes.
+
+7. Keep your notes concise but informative. Focus on the most important information that could affect gameplay.
+
+8. If you're unsure about something, indicate this in your notes and explain why.
+
+9. When you have completed your initial analysis and note-taking, output your notes using the format described in step 2.
+
+10. Delete any notes that are no longer relevant or accurate based on new information. For example, if you wrote "Player A has the Assassin" and want to delete it, pass in "Player A has the Assassin" as the note to delete.
+
+11. If there's no notes to take or nothing to do, write "TERMINATE".
+
+Remember to think step by step and thoroughly as you analyze the game and take notes. Your goal is to provide accurate and useful information about the opposing players' possible hands and strategies.
+
+Begin your analysis and note-taking now.
+"""
+
+note_prompt = note_prompt.replace("{{GAME_RULES}}", game_rules)

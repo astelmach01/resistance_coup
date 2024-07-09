@@ -1,0 +1,23 @@
+Minnie:
+	1. Suspected Cards: Duke (High confidence – confirmed by challenge and reveal)
+	2. Suspected Cards: Replacement card after losing Ambassador (Low confidence – unknown)
+	3. Strategy Notes: Aggressively challenging other players claiming Duke, as evidenced by the challenge against William.
+	4. Strategy Notes: Likely to use Duke's Tax action to amass coins quickly.
+William:
+	1. Suspected Cards: Duke (High confidence – confirmed by challenge and reveal)
+	2. Suspected Cards: Replacement card after losing Captain (Low confidence – unknown)
+	3. Strategy Notes: Has shown a tendency to challenge claims of Duke but lost a challenge against Minnie.
+	4. Strategy Notes: Likely to use Duke's Tax action like Minnie to gather coins.
+	5. Multiple characters possible due to recent exchange (Low confidence)
+	6. Has recently exchanged 2 cards. Likely adjusted strategy based on new cards.
+	7. Currently has 5 coins. In a position to potentially use an Assassin action or prepare for a Coup.
+Rosalind:
+	1. Suspected Cards: Unknown cards (Low confidence – not revealed)
+	2. Strategy Notes: Playing conservatively by taking Income (adds 1 coin).
+	3. Strategy Notes: May be avoiding attention or trying to appear non-threatening.
+	4. Unknown characters (Low confidence)
+	5. Took Income action; cautious approach, possibly avoiding immediate attention.
+	6. Has only 3 coins so may look to accumulate more through safe actions like Income or Foreign Aid.
+	7. Suspected Cards: One unknown card (Medium confidence) remaining.
+	8. Lost one Assassin (High confidence).
+	9. Active challenger, which may suggest an aggressive strategy.

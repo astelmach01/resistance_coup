@@ -90,6 +90,7 @@ def build_agent(
     round_history: List[str],
     current_game_state: Union[str, Dict[str, str]],
     coins: int,
+    notes: str,
     format_actions: bool = True,
 ) -> Tuple[GroupChatManager, Dict[str, ConversableAgent]]:
     if format_actions:
@@ -102,6 +103,7 @@ def build_agent(
         .replace("{{AVAILABLE_ACTIONS}}", formatted_actions)
         .replace("{{CURRENT_GAME_STATE}}", str(current_game_state))
         .replace("{{PREVIOUS_TURNS}}", "\n".join(round_history))
+        .replace("{{PLAYER_NOTES}}", notes)
     )
 
     reasoning_agent = build_reasoning_agent(reasoning_formatted_string)
@@ -111,6 +113,7 @@ def build_agent(
         .replace("{{CURRENT_GAME_STATE}}", str(current_game_state))
         .replace("{{PREVIOUS_TURNS}}", "\n".join(round_history))
         .replace("{{AVAILABLE_ACTIONS}}", formatted_actions)
+        .replace("{{PLAYER_NOTES}}", notes)
     )
 
     verifier_agent = build_verifier_agent(verifier_formatted_string)

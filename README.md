@@ -49,7 +49,15 @@ git clone https://github.com/dirkbrnd/resistance_coup.git
 poetry install
 ```
 
-3. Launch!
+3. Set up environment variables
+
+```sh
+touch .env
+```
+
+And place your OpenAI API key as `OPENAI_API_KEY=your_key_here`.
+
+4. Launch!
 
 ```sh
 python coup.py
