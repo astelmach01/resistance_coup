@@ -213,11 +213,62 @@ class GPTPlayer(BasePlayer):
             time.sleep(1)
             return False
 
-    def remove_card(self) -> str:
+    def remove_card(
+        self, round_history: List[str], current_game_state: Union[str, Dict[str, str]]
+    ) -> str:
         """Choose a card and remove it from your hand"""
 
+        available_actions = f"Remove a card from your hand (zero indexed). Return 0 for the 1st card, 1 for the second card, etc. The index returned MUST be between the range 0 and {len(self.cards)}"  # noqa
+
+        other_players = []
+
+        group_chat_manager, agents = build_agent(
+            self.name,
+            available_actions,
+            other_players,
+            round_history,
+            current_game_state,
+            self.coins,
+            format_actions=False,
+        )
+
+        user_agent = ConversableAgent(
+            name="Initiator",
+            llm_config=None,
+            human_input_mode="NEVER",
+            code_execution_config=False,
+        )
+
+        _ = user_agent.initiate_chat(
+            group_chat_manager,
+            message=f"I am playing as {self.name} and I have to remove a card from my hand. My current deck is {self.cards}",  # noqa
+        )
+        print()
+
+        agent_last_message = group_chat_manager.last_message(agents["action_parser_agent"])
+        print(f"Agent Last Message: {agent_last_message}")
+
+        arguments = json.loads(agent_last_message["content"])
+
+        print(f"Parsed Arguments: {arguments}")
+        target_action = arguments["action"]
+
+        index = None
+
+        try:
+            index = int(target_action)
+        except ValueError:
+            print(f"Error: Invalid action '{target_action}'")
+            time.sleep(1)
+            return ""
+
+        if index < 0 or index >= len(self.cards):
+            print(f"Error: Invalid index '{index}'")
+            time.sleep(1)
+            index = random.choice(range(len(self.cards)))
+
         # Remove a random card
-        discarded_card = self.cards.pop(random.randrange(len(self.cards)))
+        discarded_card = self.cards.pop(index)
         print_texts(
             f"{self} discards their ",
             (f"{discarded_card}", discarded_card.style),
@@ -225,11 +276,80 @@ class GPTPlayer(BasePlayer):
         )
         return f"{self} discards their {discarded_card} card"
 
-    def choose_exchange_cards(self, exchange_cards: list[Card]) -> Tuple[Card, Card]:
+    def choose_exchange_cards(
+        self,
+        exchange_cards: List[Card],
+        round_history: List[str],
+        current_game_state: Union[str, Dict[str, str]],
+    ) -> Tuple[Card, Card]:
         """Perform the exchange action. Pick which 2 cards to send back to the deck"""
 
         self.cards += exchange_cards
         random.shuffle(self.cards)
+
+        available_actions = f"Exchange 2 cards from your hand (zero indexed) as a list. For example, return [0,1] to remove the first and second card. To return the 1st and 3rd cards in the deck, return [1,3]. The indices returned MUST be between the range 0 and {len(self.cards)}, and the returned value MUST be a list of 2 integers only."  # noqa
+
+        other_players = []
+
+        group_chat_manager, agents = build_agent(
+            self.name,
+            available_actions,
+            other_players,
+            round_history,
+            current_game_state,
+            self.coins,
+            format_actions=False,
+        )
+
+        user_agent = ConversableAgent(
+            name="Initiator",
+            llm_config=None,
+            human_input_mode="NEVER",
+            code_execution_config=False,
+        )
+
+        _ = user_agent.initiate_chat(
+            group_chat_manager,
+            message=f"I am playing as {self.name} and I have to exchange 2 cards. My current deck is {self.cards} after adding in the exchanged cards to my deck. The random cards I got from the deck were {exchange_cards}",  # noqa
+        )
+        print()
+
+        agent_last_message = group_chat_manager.last_message(agents["action_parser_agent"])
+        print(f"Agent Last Message: {agent_last_message}")
+
+        arguments = json.loads(agent_last_message["content"])
+
+        print(f"Parsed Arguments: {arguments}")
+        target_action = arguments["action"]
+
+        if not isinstance(target_action, list) or len(target_action) != 2:
+            print(f"Error: Invalid action '{target_action}'")
+            time.sleep(1)
+            exit()
+
+        try:
+            index1, index2 = int(target_action[0]), int(target_action[1])
+        except ValueError:
+            print(f"Error: Invalid action '{target_action}'")
+            time.sleep(1)
+            return ""
+
+        if index1 < 0 or index1 >= len(self.cards) or index2 < 0 or index2 >= len(self.cards):
+            print(f"Error: Invalid index '{index1}' or '{index2}'")
+            time.sleep(1)
+            exit()
+
         print_text(f"{self} exchanges 2 cards")
 
-        return self.cards.pop(), self.cards.pop()
+        first_card = self.cards[index1]
+        second_card = self.cards[index2]
+
+        # Remove the larger index first
+        if index1 > index2:
+            self.cards.pop(index1)
+            self.cards.pop(index2)
+        else:
+            self.cards.pop(index2)
+            self.cards.pop(index1)
+
+        return first_card, second_card

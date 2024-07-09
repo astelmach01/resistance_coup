@@ -180,8 +180,29 @@ class ResistanceCoupGameHandler:
         print_text(lose_text)
         self._round_history.append(lose_text)
 
+        current_game_state = {
+            "players": str(
+                generate_players_table(
+                    self._players,
+                    self._players.index(challenger),
+                    rich=False,
+                    challenged_player=player_being_challenged,
+                )
+            ),
+            "game_state": str(
+                generate_state_panel(
+                    self._deck,
+                    self._treasury,
+                    self.current_player,
+                    rich=False,
+                )
+            ),
+        }
+
         # Challenge player loses influence (chooses a card to remove)
-        removed_card_text = challenger.remove_card()
+        removed_card_text = challenger.remove_card(
+            round_history=self._round_history, current_game_state=current_game_state
+        )
         self._round_history.append(removed_card_text)
 
         # Player puts card into the deck and gets a new card
@@ -260,8 +281,33 @@ class ResistanceCoupGameHandler:
         self, players_without_current: list[BasePlayer], target_action: Action
     ) -> Tuple[Optional[BasePlayer], Optional[CounterAction]]:
         # Every player can choose to counter
+        player_being_challenged = self.current_player
         for countering_player in players_without_current:
-            should_counter = countering_player.determine_counter(self.current_player)
+            player_index = self._players.index(countering_player)
+            current_game_state = {
+                "players": str(
+                    generate_players_table(
+                        self._players,
+                        player_index,
+                        rich=False,
+                        challenged_player=player_being_challenged,
+                    )
+                ),
+                "game_state": str(
+                    generate_state_panel(
+                        self._deck,
+                        self._treasury,
+                        self.current_player,
+                        rich=False,
+                    )
+                ),
+            }
+            should_counter = countering_player.determine_counter(
+                player_being_challenged,
+                players_without_current,
+                self._round_history,
+                current_game_state,
+            )
             if should_counter:
                 target_counter = get_counter_action(target_action.action_type)
 
@@ -338,7 +384,28 @@ class ResistanceCoupGameHandler:
             case ActionType.exchange:
                 # Get 2 random cards from deck
                 cards = [self._deck.pop(), self._deck.pop()]
-                first_card, second_card = self.current_player.choose_exchange_cards(cards)
+
+                current_game_state = {
+                    "players": str(
+                        generate_players_table(
+                            self._players,
+                            self._current_player_index,
+                            rich=False,
+                        )
+                    ),
+                    "game_state": str(
+                        generate_state_panel(
+                            self._deck,
+                            self._treasury,
+                            self.current_player,
+                            rich=False,
+                        )
+                    ),
+                }
+
+                first_card, second_card = self.current_player.choose_exchange_cards(
+                    cards, self._round_history, current_game_state
+                )
                 self._round_history.append(f"{self.current_player} exchanges 2 cards")
                 self._deck.append(first_card)
                 self._deck.append(second_card)
