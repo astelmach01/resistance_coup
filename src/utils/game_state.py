@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from rich.panel import Panel
 from rich.table import Column, Table
@@ -30,7 +30,10 @@ def generate_state_panel(
 
 
 def generate_players_table(
-    players: List[BasePlayer], current_player_index: int, rich: bool = True
+    players: List[BasePlayer],
+    current_player_index: int,
+    rich: bool = True,
+    challenged_player: Optional[BasePlayer] = None,
 ) -> Union[Table, List[Dict[str, Union[str, int, bool, List[str]]]]]:
     """Generate a table or list of dictionaries of the players"""
     if rich:
@@ -61,9 +64,16 @@ def generate_players_table(
     else:
         players_info = []
         for ind, player in enumerate(players):
+            # if there's a challenged player, don't leak information incorrectly
+            # we pass in the challenged player in order to pass in the
+            # correct information to the LLM for constructing the prompt
+            if challenged_player:
+                is_currently_going = player == challenged_player
+            else:
+                is_currently_going = ind == current_player_index
             player_info = {
                 "name": str(player),
-                "is_currently_going": ind == current_player_index,
+                "is_currently_going": is_currently_going,
                 "coins": player.coins,
                 "eliminated": not player.is_active,
             }

@@ -134,6 +134,8 @@ You are a genius board game player, masterful and wise. Your task is to analyze 
    <decision>
    Clear statement of the chosen action and a brief explanation of why it's the best move.
    </decision>
+   
+   Remember to not introduce any external information and that if an action requires a targeted player, ensure that player's name is clearly identified in your decision.
 """
 
 
@@ -184,7 +186,7 @@ Final recommended action...
 </recommendation>
 </response>
 
-Remember to base your analysis and recommendation solely on the information provided in the game rules, game state, previous turns, and proposed plan. Do not introduce any external information or assumptions not included in these inputs.
+Remember to base your analysis and recommendation solely on the information provided in the game rules, game state, previous turns, and proposed plan. Do not introduce any external information or assumptions not included in these inputs. If the action requires a targeted player, ensure that player's name is clearly identified in your recommendation.
 """
 
 
@@ -205,7 +207,7 @@ You are tasked with generating a valid JSON dict based on reasoning steps for a 
 
    Note: 
    - The "action" key should always be present and its value should be one of the available actions.
-   - Include the "targeted_player" key only if the action targets a specific player.
+   - Include the "targeted_player" key only if the action targets a specific player. In the case of challenging, omit the "targeted_player" key.
    - If no player is targeted, omit the "targeted_player" key entirely.
 
 Remember to ensure that the action you choose is valid and present in the list of available actions. If the reasoning steps don't clearly match any available action, choose the closest logical match based on the context provided. Remember to generate valid JSON only.

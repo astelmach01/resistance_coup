@@ -99,17 +99,119 @@ class GPTPlayer(BasePlayer):
 
         return target_action, target_player
 
-    def determine_challenge(self, player: BasePlayer) -> bool:
-        """Choose whether to challenge the current player"""
+    def determine_challenge(
+        self,
+        player_being_challenged: BasePlayer,
+        other_players: List[BasePlayer],
+        round_history: List[str],
+        current_game_state: Union[str, Dict[str, str]],
+    ) -> bool:
+        """Choose whether to challenge the current player making the move"""
 
-        # 20% chance of challenging
-        return random.randint(0, 4) == 0
+        available_actions = "Challenge player action: True or False. \nTrue: challenge the player's action. \nFalse: do not challenge the player's action."  # noqa
 
-    def determine_counter(self, player: BasePlayer) -> bool:
-        """Choose whether to counter the current player's action"""
+        group_chat_manager, agents = build_agent(
+            self.name,
+            available_actions,
+            other_players,
+            round_history,
+            current_game_state,
+            self.coins,
+            format_actions=False,
+        )
 
-        # 10% chance of countering
-        return random.randint(0, 9) == 0
+        user_agent = ConversableAgent(
+            name="Initiator",
+            llm_config=None,
+            human_input_mode="NEVER",
+            code_execution_config=False,
+        )
+
+        _ = user_agent.initiate_chat(
+            group_chat_manager,
+            message=f"It is my chance to challenge the most recent action taken by {player_being_challenged.name} as {self.name}",  # noqa
+        )
+        print()
+
+        agent_last_message = group_chat_manager.last_message(agents["action_parser_agent"])
+        print(f"Agent Last Message: {agent_last_message}")
+
+        arguments = json.loads(agent_last_message["content"])
+
+        print(f"Parsed Arguments: {arguments}")
+        target_action = arguments["action"]
+
+        # can be True, False, or a string "True" or "False", so parse both types
+        if isinstance(target_action, bool):
+            return target_action
+        elif isinstance(target_action, str):
+            lowered = target_action.lower()
+            if lowered == "true":
+                return True
+            elif lowered == "false":
+                return False
+
+        else:
+            print(f"Error: Invalid action name '{target_action}'")
+            time.sleep(1)
+            return False
+
+    def determine_counter(
+        self,
+        player_being_challenged: BasePlayer,
+        other_players: List[BasePlayer],
+        round_history: List[str],
+        current_game_state: Union[str, Dict[str, str]],
+    ) -> bool:
+        """Choose whether to counter the current player making the move"""
+
+        available_actions = "Counter player action: True or False. \nTrue: Counter the player's action. \nFalse: do not counter the player's action."  # noqa
+
+        group_chat_manager, agents = build_agent(
+            self.name,
+            available_actions,
+            other_players,
+            round_history,
+            current_game_state,
+            self.coins,
+            format_actions=False,
+        )
+
+        user_agent = ConversableAgent(
+            name="Initiator",
+            llm_config=None,
+            human_input_mode="NEVER",
+            code_execution_config=False,
+        )
+
+        _ = user_agent.initiate_chat(
+            group_chat_manager,
+            message=f"It is my chance to counter the most recent action taken by {player_being_challenged.name} as {self.name}",  # noqa
+        )
+        print()
+
+        agent_last_message = group_chat_manager.last_message(agents["action_parser_agent"])
+        print(f"Agent Last Message: {agent_last_message}")
+
+        arguments = json.loads(agent_last_message["content"])
+
+        print(f"Parsed Arguments: {arguments}")
+        target_action = arguments["action"]
+
+        # can be True, False, or a string "True" or "False", so parse both types
+        if isinstance(target_action, bool):
+            return target_action
+        elif isinstance(target_action, str):
+            lowered = target_action.lower()
+            if lowered == "true":
+                return True
+            elif lowered == "false":
+                return False
+
+        else:
+            print(f"Error: Invalid action name '{target_action}'")
+            time.sleep(1)
+            return False
 
     def remove_card(self) -> str:
         """Choose a card and remove it from your hand"""

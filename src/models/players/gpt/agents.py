@@ -90,8 +90,12 @@ def build_agent(
     round_history: List[str],
     current_game_state: Union[str, Dict[str, str]],
     coins: int,
+    format_actions: bool = True,
 ) -> Tuple[GroupChatManager, Dict[str, ConversableAgent]]:
-    formatted_actions = str(format_actions_for_llm(available_actions, coins))
+    if format_actions:
+        formatted_actions = str(format_actions_for_llm(available_actions, coins))
+    else:
+        formatted_actions = str(available_actions)
 
     reasoning_formatted_string = (
         reasoning_prompt.replace("{{GAME_RULES}}", game_rules)

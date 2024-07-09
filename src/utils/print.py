@@ -94,15 +94,13 @@ def build_action_report_string(
         case ActionType.coup:
             action_report_string += f"perform a coup against {target_player.name}."
         case ActionType.tax:
-            action_report_string += "take tax because they have influence over a Duke."
+            action_report_string += "take tax."
         case ActionType.assassinate:
             action_report_string += f"assassinate {target_player.name}."
         case ActionType.steal:
             action_report_string += f"steal coin from {target_player.name}"
         case ActionType.exchange:
-            action_report_string += (
-                "perform an exchange, because they have influence over an Ambassador."
-            )
+            action_report_string += "perform an exchange."
 
     return action_report_string
 

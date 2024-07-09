@@ -208,8 +208,30 @@ class ResistanceCoupGameHandler:
     ) -> ChallengeResult:
         # appended to round history
         # Every player can choose to challenge
+
         for challenger in other_players:
-            should_challenge = challenger.determine_challenge(player_being_challenged)
+            player_index = self._players.index(challenger)
+            current_game_state = {
+                "players": str(
+                    generate_players_table(
+                        self._players,
+                        player_index,
+                        rich=False,
+                        challenged_player=player_being_challenged,
+                    )
+                ),
+                "game_state": str(
+                    generate_state_panel(
+                        self._deck,
+                        self._treasury,
+                        self.current_player,
+                        rich=False,
+                    )
+                ),
+            }
+            should_challenge = challenger.determine_challenge(
+                player_being_challenged, other_players, self._round_history, current_game_state
+            )
             if should_challenge:
                 if challenger.is_ai:
                     text = f"{challenger} is challenging {player_being_challenged}!"
