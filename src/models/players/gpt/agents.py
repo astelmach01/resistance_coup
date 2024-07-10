@@ -8,6 +8,7 @@ from jinja2 import Template
 from .prompts import action_prompt, game_rules, reasoning_prompt, verifier_prompt
 from src.models.action import Action, AssassinateAction, CoupAction
 from src.models.players.base import BasePlayer
+from src.utils.round_history import RoundHistory
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 LLM_MODEL = os.environ.get("LLM_MODEL", "gpt-4o")
@@ -46,15 +47,18 @@ def format_actions_for_llm(available_actions: List[Action], player_coins: int) -
 
 def render_template(template_string: str, **kwargs) -> str:
     template = Template(template_string)
-    return template.render(**kwargs)
+    result = template.render(**kwargs)
+    return result
 
 
 def build_agent_base(
     name: str, prompt: str, response_format: Dict[str, Any] = None
 ) -> ConversableAgent:
+
     agent_config = llm_config.copy()
     if response_format:
         agent_config["response_format"] = response_format
+
     return ConversableAgent(
         name=name,
         system_message=prompt,
@@ -66,7 +70,7 @@ def build_agent(
     name: str,
     available_actions: List[Action],
     other_players: List[BasePlayer],
-    round_history: List[str],
+    round_history: RoundHistory,
     current_game_state: Union[str, Dict[str, str]],
     coins: int,
     notes: str,
@@ -82,7 +86,7 @@ def build_agent(
         "GAME_RULES": game_rules,
         "AVAILABLE_ACTIONS": formatted_actions,
         "CURRENT_GAME_STATE": str(current_game_state),
-        "PREVIOUS_TURNS": "\n".join(round_history),
+        "PREVIOUS_TURNS": str(round_history),
         "PLAYER_NOTES": notes,
     }
 

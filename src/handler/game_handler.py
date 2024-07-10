@@ -18,6 +18,7 @@ from src.utils.print import (
     print_text,
     print_texts,
 )
+from src.utils.round_history import RoundHistory
 
 
 class ChallengeResult(Enum):
@@ -32,8 +33,7 @@ class ResistanceCoupGameHandler:
     _deck: List[Card] = []
     _number_of_players: int = 0
     _treasury: int = 0
-    _round_history: List[str] = ["Start of round"]
-    _should_reset: bool = False
+    _round_history = RoundHistory()
 
     def __init__(self, number_of_players: int):
         self._number_of_players = number_of_players
@@ -548,9 +548,9 @@ class ResistanceCoupGameHandler:
             )
             return True
 
-        # Reset the round history after each player has taken a turn
+        # we've completed a round after each player has taken a turn
         if self.current_player == self.get_last_active_player():
-            self.reset_round_history()
+            self.conclude_round()
 
         self._next_player()
 
@@ -562,11 +562,5 @@ class ResistanceCoupGameHandler:
         return active_players[-1]
 
     # reset the round history every other round after each player has taken a turn
-    def reset_round_history(self):
-        if self._should_reset:
-            self._should_reset = False
-            print("Resetting round history...")
-            self._round_history = ["Start of round"]
-
-        else:
-            self._should_reset = True
+    def conclude_round(self):
+        self._round_history.conclude_round()

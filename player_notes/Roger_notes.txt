@@ -1,0 +1,9 @@
+Georgia:
+	1. Suspected Cards: Unknown (Low confidence)
+	2. Strategy Notes: Georgia has 3 coins. Early game strategy unknown, likely compiling resources without attention. Observe transitions for signs of Duke, Captain plays.
+Melinda:
+	1. Suspected Cards: Unknown (Low confidence)
+	2. Strategy Notes: Reduced to 1 Secret Card, possible past challenge or Coup. Might prepare aggressive plays or cautious accumulation, considering stealing-centric Captain or Ambassador actions.
+Dominic:
+	1. Suspected Cards: Unknown (Low confidence)
+	2. Strategy Notes: Dominic maintains 2 coins, potential silent Income or avoiding attention, future risk of stealth plays possibly as Captain, Assassin, or Duke.

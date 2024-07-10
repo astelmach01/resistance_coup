@@ -80,7 +80,7 @@ def take_notes(
         return response
 
     note_take_prompt = note_prompt.replace("{{GAME_STATE}}", str(current_game_state)).replace(
-        "{{ROUND_HISTORY}}", "\n".join(round_history).replace("{{PLAYER_NOTES}}", str(player_notes))
+        "{{ROUND_HISTORY}}", str(round_history).replace("{{PLAYER_NOTES}}", str(player_notes))
     )
 
     llm_config = {"model": "gpt-4o", "api_key": os.environ.get("OPENAI_API_KEY")}

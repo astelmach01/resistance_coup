@@ -8,6 +8,7 @@ from autogen import ConversableAgent
 from src.models.players.base import BasePlayer
 from src.models.players.gpt.agents import build_agent
 from src.utils.print import print_text
+from src.utils.round_history import RoundHistory
 
 
 # build a groupchat, query it, then return the json response
@@ -16,7 +17,7 @@ def build_and_chat(
     player_name: str,
     available_actions: Union[str, List],
     other_players: List[BasePlayer],
-    round_history: List[str],
+    round_history: RoundHistory,
     current_game_state: Union[str, Dict[str, str]],
     coins: int,
     notes: str,
