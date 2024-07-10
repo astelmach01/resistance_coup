@@ -3,84 +3,63 @@ from typing import Any, Dict, List, Tuple, Union
 
 from autogen import ConversableAgent, GroupChatManager
 from autogen.agentchat.groupchat import GroupChat
+from jinja2 import Template
 
 from .prompts import action_prompt, game_rules, reasoning_prompt, verifier_prompt
 from src.models.action import Action, AssassinateAction, CoupAction
 from src.models.players.base import BasePlayer
 
-llm_config = {"model": "gpt-4o", "api_key": os.environ.get("OPENAI_API_KEY")}
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+LLM_MODEL = os.environ.get("LLM_MODEL", "gpt-4o")
+
+llm_config = {"model": LLM_MODEL, "api_key": OPENAI_API_KEY}
 
 
-def format_actions_for_llm(available_actions: List[Action], player_coins: int) -> Dict[str, Any]:
-    """
-    Format the available actions into a structured dictionary representation for the LLM.
-
-    :param available_actions: List of available Action objects
-    :param player_coins: Number of coins the player has
-    :return: Dictionary with formatted action information
-    """
+def format_actions_for_llm(available_actions: List[Action], player_coins: int) -> str:
     formatted_actions = {}
-
     for i, action in enumerate(available_actions, 1):
-        action_info = {
+        formatted_actions[f"action_{i}"] = {
             "action": action.__class__.__name__,
             "type": action.action_type.value,
             "requires_target": action.requires_target,
             "can_be_challenged": action.can_be_challenged,
             "can_be_countered": action.can_be_countered,
+            "associated_card": (
+                action.associated_card_type.value if action.associated_card_type else None
+            ),
+            "cost": (
+                7
+                if isinstance(action, CoupAction)
+                else 3
+                if isinstance(action, AssassinateAction)
+                else None
+            ),
         }
 
-        if action.associated_card_type:
-            action_info["associated_card"] = action.associated_card_type.value
-
-        if isinstance(action, CoupAction):
-            action_info["cost"] = 7
-        elif isinstance(action, AssassinateAction):
-            action_info["cost"] = 3
-
-        formatted_actions[f"action_{i}"] = action_info
-
-    # Add metadata about the player's coins and any mandatory actions
     formatted_actions["metadata"] = {
         "player_coins": player_coins,
         "mandatory_coup": player_coins >= 10,
     }
 
-    return formatted_actions
+    return str(formatted_actions)
 
 
-def build_reasoning_agent(prompt: str) -> ConversableAgent:
-    reasoning_agent = ConversableAgent(
-        name="reasoning_agent",
+def render_template(template_string: str, **kwargs) -> str:
+    template = Template(template_string)
+    return template.render(**kwargs)
+
+
+def build_agent_base(
+    name: str, prompt: str, response_format: Dict[str, Any] = None
+) -> ConversableAgent:
+    agent_config = llm_config.copy()
+    if response_format:
+        agent_config["response_format"] = response_format
+    return ConversableAgent(
+        name=name,
         system_message=prompt,
-        llm_config=llm_config,
+        llm_config=agent_config,
     )
-
-    return reasoning_agent
-
-
-def build_verifier_agent(prompt: str) -> ConversableAgent:
-    verifier_agent = ConversableAgent(
-        name="verifier_agent",
-        system_message=prompt,
-        llm_config=llm_config,
-    )
-
-    return verifier_agent
-
-
-def build_action_parser_agent(prompt: str) -> ConversableAgent:
-    action_parser_agent = ConversableAgent(
-        name="action_parser_agent",
-        system_message=prompt,
-        llm_config={
-            "model": "gpt-4o",
-            "api_key": os.environ.get("OPENAI_API_KEY"),
-            "response_format": {"type": "json_object"},
-        },
-    )
-
-    return action_parser_agent
 
 
 def build_agent(
@@ -93,33 +72,32 @@ def build_agent(
     notes: str,
     format_actions: bool = True,
 ) -> Tuple[GroupChatManager, Dict[str, ConversableAgent]]:
-    if format_actions:
-        formatted_actions = str(format_actions_for_llm(available_actions, coins))
-    else:
-        formatted_actions = str(available_actions)
-
-    reasoning_formatted_string = (
-        reasoning_prompt.replace("{{GAME_RULES}}", game_rules)
-        .replace("{{AVAILABLE_ACTIONS}}", formatted_actions)
-        .replace("{{CURRENT_GAME_STATE}}", str(current_game_state))
-        .replace("{{PREVIOUS_TURNS}}", "\n".join(round_history))
-        .replace("{{PLAYER_NOTES}}", notes)
+    formatted_actions = (
+        format_actions_for_llm(available_actions, coins)
+        if format_actions
+        else str(available_actions)
     )
 
-    reasoning_agent = build_reasoning_agent(reasoning_formatted_string)
+    common_kwargs = {
+        "GAME_RULES": game_rules,
+        "AVAILABLE_ACTIONS": formatted_actions,
+        "CURRENT_GAME_STATE": str(current_game_state),
+        "PREVIOUS_TURNS": "\n".join(round_history),
+        "PLAYER_NOTES": notes,
+    }
 
-    verifier_formatted_string = (
-        verifier_prompt.replace("{{GAME_RULES}}", game_rules)
-        .replace("{{CURRENT_GAME_STATE}}", str(current_game_state))
-        .replace("{{PREVIOUS_TURNS}}", "\n".join(round_history))
-        .replace("{{AVAILABLE_ACTIONS}}", formatted_actions)
-        .replace("{{PLAYER_NOTES}}", notes)
+    reasoning_agent = build_agent_base(
+        name="reasoning_agent", prompt=render_template(reasoning_prompt, **common_kwargs)
     )
 
-    verifier_agent = build_verifier_agent(verifier_formatted_string)
+    verifier_agent = build_agent_base(
+        name="verifier_agent", prompt=render_template(verifier_prompt, **common_kwargs)
+    )
 
-    action_parser_agent = build_action_parser_agent(
-        action_prompt.replace("{{AVAILABLE_ACTIONS}}", formatted_actions)
+    action_parser_agent = build_agent_base(
+        name="action_parser_agent",
+        prompt=render_template(action_prompt, **common_kwargs),
+        response_format={"type": "json_object"},
     )
 
     agents = {
@@ -129,17 +107,13 @@ def build_agent(
     }
 
     group_chat = GroupChat(
-        agents=[reasoning_agent, verifier_agent, action_parser_agent],  # must be in this order
+        agents=list(agents.values()),
         messages=[],
-        max_round=1 + 1 + 1 + 1,  # noqa
+        max_round=4,  # initial user query + reasoning agent + verifier agent + action parser agent
         allow_repeat_speaker=False,
-        speaker_selection_method="round_robin",  # we don't need to use an LLM to auto decide
+        speaker_selection_method="round_robin",
     )
-    # user agent used to initiate chat + reasoning agent + verifier agent + action parser agent
 
-    group_chat_manager = GroupChatManager(
-        groupchat=group_chat,
-        llm_config=llm_config,
-    )
+    group_chat_manager = GroupChatManager(groupchat=group_chat, llm_config=llm_config)
 
     return group_chat_manager, agents

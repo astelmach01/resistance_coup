@@ -1,14 +1,11 @@
-import json
 import random
 import time
 from typing import Dict, List, Optional, Tuple, Union
 
-from autogen import ConversableAgent
-
+from .gpt_player_utils import build_and_chat, parse_action
 from src.models.action import Action, ActionType
 from src.models.card import Card
 from src.models.players.base import BasePlayer
-from src.models.players.gpt.agents import build_agent
 from src.models.players.gpt.notes import Notes, take_notes
 from src.utils.print import print_text, print_texts
 
@@ -23,88 +20,55 @@ class GPTPlayer(BasePlayer):
         round_history: List[str],
         current_game_state: Union[str, Dict[str, str]],
     ) -> Tuple[Action, Optional[BasePlayer]]:
-
         take_notes(self.notes, current_game_state, round_history, self.name)
-
         available_actions = self.available_actions()
 
-        group_chat_manager, agents = build_agent(
+        agent_message = build_and_chat(
             self.name,
             available_actions,
             other_players,
             round_history,
             current_game_state,
             self.coins,
-            notes=self.notes.format_notes(),
+            self.notes.format_notes(),
+            f"It is my move as {self.name} and I have {self._pretty_print_cards()} in my hand",
         )
 
-        print_text(f"[bold magenta]{self}[/] is thinking...", with_markup=True)
-        # Coup is only option
-        if len(available_actions) == 1:
-            player = random.choice(other_players)
-            return available_actions[0], player
-
-        user_agent = ConversableAgent(
-            name="Initiator",
-            llm_config=None,
-            human_input_mode="NEVER",
-            code_execution_config=False,
-        )
-
-        _ = user_agent.initiate_chat(
-            group_chat_manager,
-            message=f"It is my move as {self.name} and I have {self._pretty_print_cards()} in my hand",
-        )  # noqa
-        print()
-
-        agent_last_message = group_chat_manager.last_message(agents["action_parser_agent"])
-
-        arguments = json.loads(agent_last_message["content"])
-        target_action = arguments["action"]
-
-        try:
-            chosen_action_type = target_action.lower().replace("action", "")
-            chosen_action_type = ActionType[chosen_action_type]
-        except KeyError:
+        chosen_action = parse_action(agent_message["content"])
+        if not chosen_action:
             print_text(
-                f"Error: invalid action name, {chosen_action_type}. Available actions: {available_actions}",
+                f"Error: Invalid action {agent_message['content']} returned. Trying again...",
                 style="red",
             )
-            return None, None
+            time.sleep(5)
+            return self.choose_action(other_players, round_history, current_game_state)
 
-        # Match the chosen action type to an available action
-        for action in available_actions:
-            if action.action_type == chosen_action_type:
-                target_action = action
-                break
+        try:
+            action_type = ActionType[chosen_action.lower().replace("action", "")]
+            target_action = next(
+                action for action in available_actions if action.action_type == action_type
+            )
+        except (KeyError, StopIteration):
+            print_text(
+                f"Error: invalid action name, {chosen_action}. Available actions: {available_actions}",
+                style="red",
+            )
+            time.sleep(5)
+            return self.choose_action(other_players, round_history, current_game_state)
 
         target_player = None
-
         if target_action.requires_target:
-            target_player = arguments.get("targeted_player", "")
-
+            target_player_name = parse_action(agent_message["content"], "targeted_player")
+            target_player = next(
+                (player for player in other_players if player.name == target_player_name), None
+            )
             if not target_player:
                 print_text(
-                    f"We didn't get a target player from the agent-generated message: {arguments}",
+                    f"Error: Invalid target player '{target_player_name}'. Trying again...",
                     style="red",
                 )
-                time.sleep(1)
-                target_player = random.choice(other_players)
-
-            for player in other_players:
-                if player.name == target_player:
-                    target_player = player
-                    break
-
-        # Make sure we have a valid action/player combination
-        while not self._validate_action(target_action, target_player):
-            print_text(
-                f"{self} chose an invalid action: {target_action} on {target_player}", style="red"
-            )
-            time.sleep(1)
-            target_action = random.choice(available_actions)
-            if target_action.requires_target:
-                target_player = random.choice(other_players)
+                time.sleep(5)
+                return self.choose_action(other_players, round_history, current_game_state)
 
         return target_action, target_player
 
@@ -115,53 +79,35 @@ class GPTPlayer(BasePlayer):
         round_history: List[str],
         current_game_state: Union[str, Dict[str, str]],
     ) -> bool:
-        """Choose whether to challenge the current player making the move"""
-
-        available_actions = "Challenge player action: True or False. \nTrue: challenge the player's action. \nFalse: do not challenge the player's action. The JSON dict returned should ONLY be '{action: True/False}'"  # noqa
-
-        group_chat_manager, agents = build_agent(
+        agent_message = build_and_chat(
             self.name,
-            available_actions,
+            "Challenge player action: True or False. \nTrue: challenge the player's action.\
+            \nFalse: do not challenge the player's action.\
+            The JSON dict returned should ONLY be '{action: True/False}'",
             other_players,
             round_history,
             current_game_state,
             self.coins,
-            notes=self.notes.format_notes(),
+            self.notes.format_notes(),
+            f"It is my chance to challenge the most recent action taken by {player_being_challenged.name} as {self.name}.\
+            I have {self._pretty_print_cards()} in my hand",
             format_actions=False,
         )
 
-        user_agent = ConversableAgent(
-            name="Initiator",
-            llm_config=None,
-            human_input_mode="NEVER",
-            code_execution_config=False,
-        )
-
-        _ = user_agent.initiate_chat(
-            group_chat_manager,
-            message=f"It is my chance to challenge the most recent action taken by {player_being_challenged.name} as {self.name}. I have {self._pretty_print_cards()} in my hand",  # noqa
-        )
-        print()
-
-        agent_last_message = group_chat_manager.last_message(agents["action_parser_agent"])
-
-        arguments = json.loads(agent_last_message["content"])
-        target_action = arguments["action"]
-
-        # can be True, False, or a string "True" or "False", so parse both types
-        if isinstance(target_action, bool):
-            return target_action
-        elif isinstance(target_action, str):
-            lowered = target_action.lower()
-            if lowered == "true":
-                return True
-            elif lowered == "false":
-                return False
-
+        challenge_action = parse_action(agent_message["content"])
+        if isinstance(challenge_action, bool):
+            return challenge_action
+        elif isinstance(challenge_action, str):
+            return challenge_action.lower() == "true"
         else:
-            print_text(f"Error: invalid  challenge action '{target_action}'", style="red")
-            time.sleep(1)
-            return False
+            print_text(
+                f"Error: invalid challenge action '{challenge_action}'. Trying again...",
+                style="red",
+            )
+            time.sleep(5)
+            return self.determine_challenge(
+                player_being_challenged, other_players, round_history, current_game_state
+            )
 
     def determine_counter(
         self,
@@ -170,109 +116,65 @@ class GPTPlayer(BasePlayer):
         round_history: List[str],
         current_game_state: Union[str, Dict[str, str]],
     ) -> bool:
-        """Choose whether to counter the current player making the move"""
-
-        available_actions = "Counter player action: True or False. \nTrue: Counter the player's action. \nFalse: do not counter the player's action. The JSON dict returned should ONLY be '{action: True/False}'"  # noqa
-
-        group_chat_manager, agents = build_agent(
+        agent_message = build_and_chat(
             self.name,
-            available_actions,
+            "Counter player action: True or False. \nTrue: Counter the player's action.\
+            \nFalse: do not counter the player's action.\
+            The JSON dict returned should ONLY be '{action: True/False}'",
             other_players,
             round_history,
             current_game_state,
             self.coins,
-            notes=self.notes.format_notes(),
+            self.notes.format_notes(),
+            f"It is my chance to counter the most recent action taken by {player_being_challenged.name} as {self.name}.\
+            I have {self._pretty_print_cards()} in my hand",
             format_actions=False,
         )
 
-        user_agent = ConversableAgent(
-            name="Initiator",
-            llm_config=None,
-            human_input_mode="NEVER",
-            code_execution_config=False,
-        )
+        counter_action = parse_action(agent_message["content"])
 
-        _ = user_agent.initiate_chat(
-            group_chat_manager,
-            message=f"It is my chance to counter the most recent action taken by {player_being_challenged.name} as {self.name}. I have {self._pretty_print_cards()} in my hand",  # noqa
-        )
+        # if we were passed in a bool, return that
+        if isinstance(counter_action, bool):
+            return counter_action
 
-        agent_last_message = group_chat_manager.last_message(agents["action_parser_agent"])
-
-        arguments = json.loads(agent_last_message["content"])
-        target_action = arguments["action"]
-
-        # can be True, False, or a string "True" or "False", so parse both types
-        if isinstance(target_action, bool):
-            return target_action
-        elif isinstance(target_action, str):
-            lowered = target_action.lower()
-            if lowered == "true":
-                return True
-            elif lowered == "false":
-                return False
-
+        # or if we were passed in a string, check if it is "true" or "false"
+        elif isinstance(counter_action, str):
+            return counter_action.lower() == "true"
         else:
-            print_text(f"Error: invalid counter action '{target_action}'", style="red")
-            time.sleep(1)
-            return False
+            print_text(
+                f"Error: invalid counter action '{counter_action}'. Trying again...", style="red"
+            )
+            time.sleep(5)
+            return self.determine_counter(
+                player_being_challenged, other_players, round_history, current_game_state
+            )
 
     def remove_card(
         self, round_history: List[str], current_game_state: Union[str, Dict[str, str]]
     ) -> str:
-        """Choose a card and remove it from your hand"""
-
-        available_actions = f"Remove a card from your hand (zero indexed). Return 0 for the 1st card, 1 for the second card, etc. The index returned MUST be between the range 0 and {len(self.cards)}. The JSON dict returned should ONLY have the key 'action' with the card number as the value'"  # noqa
-
-        other_players = []
-
-        group_chat_manager, agents = build_agent(
+        agent_message = build_and_chat(
             self.name,
-            available_actions,
-            other_players,
+            f"Remove a card from your hand (zero indexed). Return 0 for the 1st card, 1 for the second card, etc.\
+            The index returned MUST be between the range 0 and {len(self.cards) - 1}.\
+            The JSON dict returned should ONLY have the key 'action' with the card number as the value'",
+            [],
             round_history,
             current_game_state,
             self.coins,
-            notes=self.notes.format_notes(),
+            self.notes.format_notes(),
+            f"I am playing as {self.name} and I have to remove a card from my hand.\
+            My current deck is {self._pretty_print_cards()}",
             format_actions=False,
         )
 
-        user_agent = ConversableAgent(
-            name="Initiator",
-            llm_config=None,
-            human_input_mode="NEVER",
-            code_execution_config=False,
-        )
+        index = parse_action(agent_message["content"])
 
-        _ = user_agent.initiate_chat(
-            group_chat_manager,
-            message=f"I am playing as {self.name} and I have to remove a card from my hand. My current deck is {self._pretty_print_cards()}",  # noqa
-        )
-        print()
+        # check that we were passed in a valid index and integer
+        if not isinstance(index, int) or index < 0 or index >= len(self.cards):
+            print_text(f"Error: Invalid index '{index}'. Trying again...", style="red")
+            time.sleep(5)
+            return self.remove_card(round_history, current_game_state)
 
-        agent_last_message = group_chat_manager.last_message(agents["action_parser_agent"])
-        print(f"Agent Last Message: {agent_last_message}")
-
-        arguments = json.loads(agent_last_message["content"])
-
-        print(f"Parsed Arguments: {arguments}")
-        target_action = arguments["action"]
-
-        index = None
-
-        try:
-            index = int(target_action)
-        except ValueError:
-            print(f"Error: Invalid action '{target_action}'")
-            time.sleep(1)
-            return ""
-
-        if index < 0 or index >= len(self.cards):
-            print(f"Error: Invalid index '{index}'")
-            time.sleep(1)
-            index = random.choice(range(len(self.cards)))
-
-        # Remove a random card
         discarded_card = self.cards.pop(index)
         print_texts(
             f"{self} discards their ",
@@ -287,80 +189,52 @@ class GPTPlayer(BasePlayer):
         round_history: List[str],
         current_game_state: Union[str, Dict[str, str]],
     ) -> Tuple[Card, Card]:
-        """Perform the exchange action. Pick which 2 cards to send back to the deck"""
-
         self.cards += exchange_cards
         random.shuffle(self.cards)
 
-        available_actions = f"Exchange 2 cards from your hand (zero indexed) as a list. For example, return [0,1] to remove the first and second card. To return the 1st and 3rd cards in the deck, return [1,3]. The indices returned MUST be between the range 0 and {len(self.cards) - 1}, and the returned value MUST be a list of 2 integers only that are unique. The JSON dict returned should ONLY have a key of 'action' with a value of a list of 2 valid integers"  # noqa
+        formatted_exhange_cards = ", ".join(str(card) for card in exchange_cards)
 
-        other_players = []
-
-        group_chat_manager, agents = build_agent(
+        agent_message = build_and_chat(
             self.name,
-            available_actions,
-            other_players,
+            f"Exchange 2 cards from your hand (zero indexed) as a list.\
+            For example, return [0,1] to remove the first and second card.\
+            To return the 1st and 3rd cards in the deck, return [1,3].\
+            The indices returned MUST be between the range 0 and {len(self.cards) - 1},\
+            and the returned value MUST be a list of 2 integers only that are unique.\
+            The JSON dict returned should ONLY have a key of 'action' with a value of a list of 2 valid integers",
+            [],
             round_history,
             current_game_state,
             self.coins,
-            notes=self.notes.format_notes(),
+            self.notes.format_notes(),
+            f"I am playing as {self.name} and I have to exchange 2 cards.\
+            My current deck is {self._pretty_print_cards()} after adding in the exchanged cards to my deck.\
+            The random cards I got from the deck were {formatted_exhange_cards}",
             format_actions=False,
         )
 
-        user_agent = ConversableAgent(
-            name="Initiator",
-            llm_config=None,
-            human_input_mode="NEVER",
-            code_execution_config=False,
-        )
+        indices = parse_action(agent_message["content"])
 
-        _ = user_agent.initiate_chat(
-            group_chat_manager,
-            message=f"I am playing as {self.name} and I have to exchange 2 cards. My current deck is {self._pretty_print_cards()} after adding in the exchanged cards to my deck. The random cards I got from the deck were {exchange_cards}",  # noqa
-        )
-        print()
-
-        agent_last_message = group_chat_manager.last_message(agents["action_parser_agent"])
-        print(f"Agent Last Message: {agent_last_message}")
-
-        arguments = json.loads(agent_last_message["content"])
-
-        print(f"Parsed Arguments: {arguments}")
-        target_action = arguments["action"]
-
-        if not isinstance(target_action, list) or len(target_action) != 2:
-            print(f"Error: Invalid action '{target_action}'")
-            time.sleep(1)
-            exit()
-
-        try:
-            index1, index2 = int(target_action[0]), int(target_action[1])
-        except ValueError:
-            print(f"Error: Invalid action '{target_action}'")
-            time.sleep(1)
-            return ""
-
-        if index1 < 0 or index1 >= len(self.cards) or index2 < 0 or index2 >= len(self.cards):
-            print(f"Error: Invalid index '{index1}' or '{index2}'")
-            time.sleep(1)
-            exit()
-
-        if index1 == index2:
-            print(f"Error: Cannot exchange the same card '{index1}' and '{index2}'")
-            time.sleep(1)
-            exit()
+        # validate that we were passed in a list of 2 unique integers that are within the range of our cards
+        if (
+            not isinstance(indices, list)  # noqa: W503
+            or len(indices) != 2  # noqa: W503
+            or not all(  # noqa: W503
+                isinstance(i, int) and 0 <= i < len(self.cards) for i in indices  # noqa: W503
+            )  # noqa: W503
+            or indices[0] == indices[1]  # noqa: W503
+        ):
+            print_text(f"Error: Invalid indices '{indices}'. Trying again...", style="red")
+            time.sleep(5)
+            return self.choose_exchange_cards(exchange_cards, round_history, current_game_state)
 
         print_text(f"{self} exchanges 2 cards")
 
-        first_card = self.cards[index1]
-        second_card = self.cards[index2]
+        first_card = self.cards[indices[0]]
+        second_card = self.cards[indices[1]]
 
         # Remove the larger index first
-        if index1 > index2:
-            self.cards.pop(index1)
-            self.cards.pop(index2)
-        else:
-            self.cards.pop(index2)
-            self.cards.pop(index1)
+        self.cards.pop(max(indices))
+        self.cards.pop(min(indices))
 
         return first_card, second_card

@@ -247,10 +247,11 @@ Next, review the current state of the game:
 {{GAME_STATE}}
 </game_state>
 
-Now, examine the history of the round:
-<round_history>
-{{ROUND_HISTORY}}
-</round_history>
+Now, review any previous turns in this round:
+
+<previous_turns>
+{{PREVIOUS_TURNS}}
+</previous_turns>
 
 
 Here's the notes that have already been taken:

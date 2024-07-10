@@ -5,7 +5,7 @@ from typing import Annotated, Dict, List, Union
 from autogen import ConversableAgent, register_function
 from pydantic import BaseModel
 
-from src import SRC_DIR
+from src import PLAYER_NOTES_DIR
 from src.models.players.gpt.prompts import note_prompt
 
 
@@ -120,8 +120,5 @@ def take_notes(
         note_taker, message=f"I am currently playing as {current_player_name}.", max_turns=3
     )
 
-    files_dir = SRC_DIR.parent / "player_notes"
-    files_dir.mkdir(exist_ok=True)
-
-    with open(files_dir / f"{current_player_name}_notes.txt", "w") as f:
+    with open(PLAYER_NOTES_DIR / f"{current_player_name}_notes.txt", "w") as f:
         f.write(str(player_notes))

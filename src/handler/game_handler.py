@@ -33,6 +33,7 @@ class ResistanceCoupGameHandler:
     _number_of_players: int = 0
     _treasury: int = 0
     _round_history: List[str] = ["Start of round"]
+    _should_reset: bool = False
 
     def __init__(self, number_of_players: int):
         self._number_of_players = number_of_players
@@ -560,6 +561,12 @@ class ResistanceCoupGameHandler:
         active_players = [player for player in self._players if player.is_active]
         return active_players[-1]
 
+    # reset the round history every other round after each player has taken a turn
     def reset_round_history(self):
-        print("Resetting round history...")
-        self._round_history = ["Start of round"]
+        if self._should_reset:
+            self._should_reset = False
+            print("Resetting round history...")
+            self._round_history = ["Start of round"]
+
+        else:
+            self._should_reset = True

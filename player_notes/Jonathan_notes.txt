@@ -1,0 +1,21 @@
+Barbara:
+	1. Suspected Cards: Unknown at this time (No information yet).
+	2. Strategy Notes: Keep an eye on actions taken by Barbara to deduce her cards. Be wary of challenges if claiming Duke or other powerful actions.
+	3. Suspected Cards: Unknown
+	4. Strategy Notes: With 5 coins, Barbara is in a strong position to take effective actions, but may also be cautious to avoid early coups.
+Jon:
+	1. Suspected Cards: Unknown at this time (No information yet).
+	2. Strategy Notes: Observe Jon's chosen actions for clues about his cards. He may try to counter your actions if he has corresponding counteraction characters.
+	3. Suspected Cards: Unknown
+	4. Strategy Notes: Jon has 4 coins, which keeps him flexible for various actions except a coup; potential to save for a coup if threatened.
+	5. Suspected Cards: Unknown (High confidence on at least 1 unknown)
+	6. Strategy Notes: With 4 coins, Jon may opt to take Income (1 coin) or Foreign Aid (2 coins) to rapidly reach 7 coins and trigger a Coup. If Jon claims Duke for the Tax action (collecting 3 coins), consider challenging unless we believe it's genuine or can block with a Duke ourselves. Given that one influence is hidden, Jon’s strategy is likely to gather resources quickly to avoid becoming a target or to prepare for more aggressive actions.
+	7. Suspected Cards: Medium confidence in Captain/Assassin. Low confidence in Duke and Ambassador.
+	8. Strategy Notes: Tends to leverage coin advantage with potential to bluff Coup or assassination. Be vigilant of possible unexpected moves based on his observation.
+Frank:
+	1. Suspected Cards: Unknown at this time (No information yet).
+	2. Strategy Notes: Monitor Frank's behavior and actions closely. Potential for bluffing or legitimate use of counteractions.
+	3. Suspected Cards: Unknown
+	4. Strategy Notes: Frank, with only 2 coins, is less likely to perform costly actions but remains a threat for possible bluffing or lower-cost moves like income.
+	5. Suspected Cards: Unknown (Low confidence on a specific card)
+	6. Strategy Notes: With 3 coins, Frank may attempt to take Income or Foreign Aid to gain resources. Frank can also claim Captain and try to steal coins from Jonathan or Jon. This can be blocked by a Captain or Ambassador if needed. Frank could also opt for Ambassador to exchange cards, giving him more flexibility and opportunities to fetch cards for better strategic positioning.
