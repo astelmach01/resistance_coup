@@ -1,14 +1,15 @@
-Georgia:
-	1. Suspected Cards: Duke (Medium confidence): Georgia might be hoarding coins quickly to use Tax later.
-	2. Suspected Cards: Captain (Low confidence): Could be preparing to steal if Roger or Melinda gain more coins.
-	3. Strategy Notes: Possibly building up to a high-income strategy, might challenge Foreign Aid to protect potential Duke influence.
-	4. Suspected Cards: Unknown (No information on Georgia's cards so far).
-	5. Strategy Notes: Georgia has no coins currently, which limits her options to Income (1 coin) or taking a risk to claim a character action. She might aim to gather coins to prepare for future influence or potential coups.
-Melinda:
-	1. Suspected Cards: Assassin (Low confidence): Holding 2 coins could be prepping for an Assassination if coins increase.
-	2. Suspected Cards: Contessa (Low confidence): Could potentially block an Assassination if spotted.
-	3. Strategy Notes: Low on coins but might be playing conservatively, watches for opponents' Assassinations or high-coin collections.
-Roger:
-	1. Suspected Cards: Ambassador (Medium confidence): Might block Stealing or use Exchange for better cards.
-	2. Suspected Cards: Captain (Low confidence): Could be waiting to steal coins from anyone gathering more.
-	3. Strategy Notes: Likely defensive, might watch for optimal stealing opportunities or card exchanges.
+Donald:
+	1. Suspected Cards: Unknown
+	2. Strategy Notes: Current coins: 5, cautious and possibly setting up for a Coup. Needs scrutiny for future actions.
+	3. Suspected Cards: None yet
+	4. Strategy Notes: Close to a Coup threshold; monitor closely for Income or Duke's Tax claim
+Dario:
+	1. Suspected Cards: Unknown
+	2. Strategy Notes: Current coins: 3, playing conservatively. Watch out for a sudden offensive move.
+	3. Suspected Cards: None yet
+	4. Strategy Notes: Likely to be aiming for mid-game actions like Stealing or Assassination
+Mike:
+	1. Suspected Cards: Unknown
+	2. Strategy Notes: Current coins: 2, likely collecting more coins for future actions. Needs observation.
+	3. Suspected Cards: None yet
+	4. Strategy Notes: Possibly preparing to either exchange cards or build up coins gradually

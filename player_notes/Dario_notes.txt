@@ -1,0 +1,22 @@
+Donald:
+	1. Suspected Cards: No specific cards identified yet.
+	2. Strategy Notes: Might take action to gain more coins or execute Coup. Potential bluff or block for strategic advantage.
+	3. Suspected Cards: Unknown.
+	4. Approaching Coup threshold due to 5 coins. No cards revealed yet, so conservative with actions.
+	5. Suspected Cards: Inconclusive as of now. May have a mix of any cards. Low confidence.
+	6. Strategy: Likely saving coins to accumulate enough for a Coup or getting close to it. Unclear without knowing his last few actions.
+	7. Suspected Cards: Duke (Low confidence). Strategy: Building coins, possibly planning Tax action soon.
+	8. Suspected Cards: Unknown (Low confidence)
+	9. Preparing for a potential coup action due to high coin count.
+	10. Likely strategies might include claiming Duke to tax and increase coin reserve or bluffing high-risk actions.
+Dominic:
+	1. Suspected Cards: No specific cards identified yet.
+	2. Strategy Notes: Likely to perform non-challenging income actions. Possible Captain claim for Steal or Ambassador for Exchange.
+	3. Suspected Cards: Unknown but maintains dual influence.
+	4. Also approaching Coup threshold, aggressive plays likely soon due to having 5 coins and 2 influence cards.
+Mike:
+	1. Suspected Cards: No specific cards identified yet.
+	2. Strategy Notes: Similar cautious income-driven actions. Potential bluff or simple income generation.
+	3. Suspected Cards: Unknown.
+	4. Lower coins may suggest forthcoming attempts at Income or claims on Duke's Tax/Foreign Aid/Steal actions to increase coin faster.
+	5. Suspected Cards: Contessa (Medium confidence). Strategy: Likely to block Assassination attempts.
