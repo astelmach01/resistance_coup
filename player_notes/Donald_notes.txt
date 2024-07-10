@@ -1,0 +1,26 @@
+Dario:
+	1. Suspected Cards: General hidden cards - Unknown influence (Low confidence)
+	2. Strategy: Likely to prioritize coin accumulation (low risk actions)
+	3. Suspected Cards: Unknown (Will update based on subsequent actions).
+	4. Strategy: Possible low coin strategy or focus on getting influence since low coin count; may aim for Foreign Aid if their Duke is proven to counterfeit.
+	5. With only 3 coins, likely to claim Income or Foreign Aid next. Watch for Duke counteraction if Foreign Aid is claimed. Passive strategy expected currently.
+	6. Suspected Cards: Duke (Medium confidence)
+	7. Suspected Cards: Assassin (Medium confidence)
+	8. Strategy: Possibly aiming to gather enough coins for a coup. Defensive play likely to counteract possible Foreign Aid or stealing.
+	9. Suspected Cards: Duke (Medium confidence): Accumulated coins could mean he gathered tax by Duke.
+	10. Strategy: Likely to either perform a Coup or Assassination in his next turn due to high coins.
+Dominic:
+	1. Suspected Cards: General hidden cards - Unknown influence (Low confidence)
+	2. Strategy: Likely to prioritize coin accumulation (low risk actions)
+	3. Suspected Cards: Unknown (Careful observations needed based on his actions).
+	4. Strategy: Holding on to card advantage with 2 influence cards; potentially may claim Duke to collect taxes or Captain to steal coins. Watch for bluff attempts.
+	5. Likely to perform a Coup soon due to 8 coins. Potential offensive strategy with high coins, targeting players with fewer face-down cards.
+Mike:
+	1. Suspected Cards: General hidden cards - Unknown influence (Low confidence)
+	2. Strategy: Likely to prioritize coin accumulation (low risk actions)
+	3. Suspected Cards: Unknown (Due to limited coins, likelihood of power characters may vary).
+	4. Strategy: On a defensive position based on current low coin count; might take Income or seek Foreign Aid. Could be preparing to counteract or challenge to regain influence.
+	5. On a lower coin count, likely to focus on gaining coins via Income or Foreign Aid. Counteractions should be expected if he claims Foreign Aid.
+	6. Suspected Cards: Duke (Medium confidence)
+	7. Suspected Cards: Assassin (Medium confidence)
+	8. Strategy: Likely to aim for acquiring coins for coups or to intimidate with the threat of assassination. Prepared to counteract actions like Foreign Aid.

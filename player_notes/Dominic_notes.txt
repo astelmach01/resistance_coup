@@ -1,0 +1,15 @@
+Donald:
+	1. Suspected Cards: Unknown
+	2. Strategy Notes: Current coins: 5, cautious and possibly setting up for a Coup. Needs scrutiny for future actions.
+	3. Suspected Cards: None yet
+	4. Strategy Notes: Close to a Coup threshold; monitor closely for Income or Duke's Tax claim
+Dario:
+	1. Suspected Cards: Unknown
+	2. Strategy Notes: Current coins: 3, playing conservatively. Watch out for a sudden offensive move.
+	3. Suspected Cards: None yet
+	4. Strategy Notes: Likely to be aiming for mid-game actions like Stealing or Assassination
+Mike:
+	1. Suspected Cards: Unknown
+	2. Strategy Notes: Current coins: 2, likely collecting more coins for future actions. Needs observation.
+	3. Suspected Cards: None yet
+	4. Strategy Notes: Possibly preparing to either exchange cards or build up coins gradually

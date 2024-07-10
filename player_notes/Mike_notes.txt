@@ -1,0 +1,23 @@
+Donald:
+	1. Suspected Cards: None
+	2. Strategy Notes: Might be accumulating coins for a potential Coup or using a character action for gaining additional coins.
+	3. Suspected Cards: Likely not possessing an Assassin (Low confidence).
+	4. Strategy Notes: May be saving coins to perform a Coup as he reaches 7 coins.
+	5. Suspected Cards: Not enough information (starting assumptions)
+	6. Strategy Notes: No revealed strategy yet, might try to gather more coins for a potential Coup or use stealing/assassination.
+	7. Suspected Cards: Unknown
+	8. Strategy Notes: Donald has 5 coins and has not been eliminated. Future turns may see him trying to gather more coins for a Coup.
+Dario:
+	1. Suspected Cards: None
+	2. Strategy Notes: Might be preparing to use an Assassin action or positioning for future aggressive actions.
+	3. Suspected Cards: No specific card identified yet.
+	4. Strategy Notes: His lower coin count suggests he's yet to engage in significant actions. May focus on Income or Foreign Aid soon.
+	5. Suspected Cards: Not enough information (starting assumptions)
+	6. Strategy Notes: No revealed strategy yet, might try to gather coins or prepare for character-specific actions like Steal or Assassinate.
+	7. Suspected Cards: Unknown
+	8. Strategy Notes: Dario has 6 coins and has not been eliminated. He is likely to gather more coins or attempt aggressive actions in the following turns.
+Dominic:
+	1. Suspected Cards: None
+	2. Strategy Notes: Possible strategic intentions include either gathering coins for a Coup or taking advantage of character-specific actions.
+	3. Suspected Cards: No specific card identified yet. He has both cards unrevealed.
+	4. Strategy Notes: With 8 coins, he's one away from being forced to initiate a Coup. Likely to aim for a challenging play shortly.

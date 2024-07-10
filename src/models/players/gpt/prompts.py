@@ -111,7 +111,7 @@ You are a genius board game player, masterful and wise. Your task is to analyze 
 {{CURRENT_GAME_STATE}}
 </current_game_state>
 
-4. If there have been any previous turns in this round, review them:
+4. Review previous turns in the rounds (if any) to understand the game history:
 <previous_turns>
 {{PREVIOUS_TURNS}}
 </previous_turns>
@@ -160,7 +160,7 @@ Now, consider the current state of the game:
 {{GAME_STATE}}
 </game_state>
 
-Review any previous turns in this round:
+Review any previous turns in the rounds:
 
 <previous_turns>
 {{PREVIOUS_TURNS}}
@@ -247,10 +247,11 @@ Next, review the current state of the game:
 {{GAME_STATE}}
 </game_state>
 
-Now, examine the history of the round:
-<round_history>
-{{ROUND_HISTORY}}
-</round_history>
+Now, review the previous actions in the rounds:
+
+<previous_turns>
+{{PREVIOUS_TURNS}}
+</previous_turns>
 
 
 Here's the notes that have already been taken:
@@ -295,3 +296,77 @@ Begin your analysis and note-taking now.
 """
 
 note_prompt = note_prompt.replace("{{GAME_RULES}}", game_rules)
+
+
+#### ACTION PROMPTS
+
+remove_card_prompt = """
+You are an AI player in a card game. Your task is to remove a card from your hand and return the index of the card you've chosen to remove.
+
+You have a hand of cards, and the number of cards in your hand is:
+<num_cards>{{NUM_CARDS}}</num_cards>
+
+To complete this task, follow these steps:
+
+1. Choose a card to remove from your hand. The cards are zero-indexed, meaning the first card is at index 0, the second card is at index 1, and so on.
+
+2. The index you choose must be between 0 and (NUM_CARDS - 1), inclusive.
+
+3. Once you've decided which card to remove, you need to return your choice in a specific format:
+- Your response should be a JSON dictionary.
+- The dictionary should have only one key: "action"
+- The value for the "action" key should be the index of the card you've chosen to remove.
+
+Here are some examples of valid responses:
+
+For removing the first card (index 0):
+<example>
+{"action": 0}`
+</example>
+
+For removing the third card (index 2):
+<example>
+{"action": 2}
+</example>
+
+Remember:
+- The index must be a whole number (integer).
+- The index must be between 0 and (NUM_CARDS - 1), inclusive.
+- Your response must be a valid JSON dictionary with only the "action" key.
+
+Provide the valid JSON dictionary ONLY.
+"""
+
+
+exchange_cards_prompt = """
+You are an AI assistant tasked with selecting two cards to exchange from a hand of cards. Your task is to return the indices of these two cards as a list.
+
+You have a hand of cards with the following number of cards:
+<hand_size>{{NUM_CARDS}}</hand_size>
+
+Please follow these requirements when selecting the cards to exchange:
+
+1. The indices must be zero-indexed. This means the first card is at index 0, the second at index 1, and so on.
+2. You must select exactly two cards.
+3. The indices you select must be unique (you cannot select the same card twice).
+4. The indices must be within the range of 0 to (HAND_SIZE - 1), inclusive.
+5. Your response should be a list of two integers representing the indices of the cards you wish to exchange.
+
+Examples:
+- Valid output: [0, 1] (exchanges the first and second cards)
+- Valid output: [2, 4] (exchanges the third and fifth cards)
+- Invalid output: [0, 0] (selects the same card twice)
+- Invalid output: [1, HAND_SIZE] (second index is out of range)
+- Invalid output: [0, 1, 2] (selects more than two cards)
+
+Your final answer should be formatted as a JSON dictionary with a single key "action" whose value is the list of two integers representing the indices of the cards to exchange.
+
+Please provide your answer in the following format:
+<answer>
+{
+"action": [x, y]
+}
+</answer>
+
+Where x and y are the two indices you have selected, meeting all the above requirements.
+"""

@@ -28,6 +28,10 @@ In a nutshell:
 
 The main package to mention here is [Rich](https://github.com/Textualize/rich). It was instrumental in making it as pretty as possible on the terminal!
 
+## Architecture of the Multi-Agent System
+
+See [architecture.md](architecture.md) for a detailed breakdown of the system.
+
 ## Getting Started
 
 ### Prerequisites
