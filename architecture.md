@@ -46,17 +46,18 @@ The high level Plan-Verify-Execute architecture overview is as follows:
         - A round history of publicly available user actions made is kept, such as "Player 1 challenged Player 2's assassination attempt." The most recent 2 rounds of play is stored as the round history, where a round is defined as a full cycle of moves from the first active player to the last active player. Intuitively, the round history does not need to keep track of every single move made from the start, as we have long-term memory to note down important events. For example, it does not matter if Player 1 exchanged 2 cards 20 turns ago, as the game state has likely changed significantly since then.
 
     - Long-term memory:
-        - We give the player access to notes, a completely separate agent that keeps track of suspected strategies and cards of opposing players. For example, if a player assassinates another player, the notes agent would note that there is a decent probability that the player has an Assassin card. Notes can be deleted as well.
+        - Persistent memory across is also very useful in multi-agent systems. We give the player access to notes, a completely separate agent that keeps track of suspected strategies and cards of opposing players. For example, if a player assassinates another player, the notes agent would note that there is a decent probability that the player has an Assassin card. Notes can be dynamically deleted as well. Notes are a simple dictionary that maps player names to a list of notes, specifically targeting the player's strategy and cards. Notes are also marked with a level of confidence: low, medium, or high.
+        - Specifically, the notes agent is an agent that has access to 2 functions: add and delete. It's completely separate from the group chat, but has access to the same information of round history, game state, possible actions, and previously taken notes.
 
 3. **Prompts** (`prompts.py`):
 
-    Each agent is a given a role-specific prompt. These prompts were designed by Anthropic's "Generate a Prompt" feature in the dev console, turning my initial prompt into a Chain-of-Thought prompt. Specific context such as round history is then injected via jinja.
+    Each agent is a given a role-specific prompt. These prompts were designed by Anthropic's "Generate a Prompt" feature in the dev console, turning my initial prompt into a more effective and comprehensive Chain-of-Thought prompt. Agents are prompted to generate specific outputs, and examples are given. Specific context such as round history is then injected via jinja.
 
 ### Other Notes
+
 - Player notes for a sample game can be inspected under the `player_notes` directory.
 - The corresponding full game text can be found in `full_game_with_notes.txt`.
 - Notes are only taken when a player needs to choose an action, but not when challenging, counteracting, or exchanging cards.
-
 
 ## New Code Added
 
